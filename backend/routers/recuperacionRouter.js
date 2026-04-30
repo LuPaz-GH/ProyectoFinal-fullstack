@@ -218,18 +218,23 @@ router.post('/forgot-password/reset-password', async (req, res) => {
     const userId = users[0].id;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+    const [empRows] = await pool.query('SELECT nombre, usuario FROM empleados WHERE id = ?', [userId]);
+    const empleado = empRows[0];
+
     let updateQuery = `
-      UPDATE empleados 
-      SET password = ?, 
-          reset_token = NULL, 
+      UPDATE empleados
+      SET password = ?,
+          reset_token = NULL,
           reset_expires = NULL
     `;
     let params = [hashedPassword];
+    const cambios = ['Contraseña actualizada'];
 
     if (newUsuario && newUsuario.trim()) {
       console.log('[RESET-PASSWORD] Actualizando usuario a:', newUsuario.trim());
       updateQuery += ', usuario = ?';
       params.push(newUsuario.trim().toLowerCase());
+      cambios.push('Usuario actualizado');
     }
 
     updateQuery += ' WHERE id = ?';
@@ -237,11 +242,21 @@ router.post('/forgot-password/reset-password', async (req, res) => {
 
     await pool.query(updateQuery, params);
 
+    await pool.query(
+      `INSERT INTO auditoria (fecha, producto, accion, responsable, modulo, id_referencia, eliminado)
+       VALUES (NOW(), ?, 'Editado', ?, 'empleados', ?, 0)`,
+      [
+        `Empleado: ${empleado?.nombre || 'Desconocido'} | Cambios: ${cambios.join('; ')}`,
+        empleado?.usuario || 'self',
+        userId
+      ]
+    );
+
     console.log('[RESET-PASSWORD] Cuenta actualizada con éxito');
 
-    res.json({ 
-      success: true, 
-      message: 'Contraseña y usuario actualizados correctamente. Ya podés iniciar sesión.' 
+    res.json({
+      success: true,
+      message: 'Contraseña y usuario actualizados correctamente. Ya podés iniciar sesión.'
     });
   } catch (err) {
     console.error('[RESET-PASSWORD] Error al procesar reset:', err);

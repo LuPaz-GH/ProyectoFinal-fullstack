@@ -98,6 +98,28 @@ router.get('/historial', async (req, res) => {
     }
 });
 
+// ==================== NOTIFICACIONES DE CAMBIO DE CREDENCIALES ====================
+router.get('/credenciales-empleados', async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT id, producto, responsable,
+                DATE_FORMAT(fecha, '%d/%m/%Y %H:%i') as fecha_formateada
+            FROM auditoria
+            WHERE modulo = 'empleados'
+            AND accion = 'Editado'
+            AND eliminado = 0
+            AND (producto LIKE '%Contraseña%' OR producto LIKE '%Usuario actualizado%')
+            AND fecha >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ORDER BY fecha DESC
+            LIMIT 50
+        `);
+        res.json({ success: true, datos: rows });
+    } catch (error) {
+        console.error('Error en GET /auditoria/credenciales-empleados:', error.message);
+        res.json({ success: true, datos: [] });
+    }
+});
+
 // ==================== PAPELERA GENERAL DE AUDITORÍA ====================
 router.get('/papelera', async (req, res) => {
     try {

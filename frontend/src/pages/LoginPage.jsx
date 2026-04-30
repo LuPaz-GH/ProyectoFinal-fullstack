@@ -69,7 +69,9 @@ const LoginPage = ({ setUser }) => {
       console.log('🔍 [Login] Comparación de roles:', { backend: rolBackend, seleccionado: rolSeleccionadoId });
 
       if (rolBackend && rolSeleccionadoId && rolBackend !== rolSeleccionadoId) {
-        console.warn('⚠️ [Login] Rol no coincide exactamente, pero se permite acceso:', { backend: rolBackend, seleccionado: rolSeleccionadoId });
+        setError('Usuario o contraseña incorrectos');
+        setLoading(false);
+        return;
       }
 
       const userParaGuardar = {
@@ -202,7 +204,7 @@ const LoginPage = ({ setUser }) => {
     : 'https://wa.me/5493815192208';
 
   return (
-    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center" 
+    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center"
          style={{ background: 'linear-gradient(135deg, #663399 0%, #ff69b4 100%)' }}>
       
       <div className="card border-0 shadow-lg p-5 text-center position-relative" 

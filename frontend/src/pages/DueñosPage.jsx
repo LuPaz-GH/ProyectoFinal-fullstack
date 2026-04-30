@@ -8,7 +8,9 @@ import {
   faFilePdf,
   faFileExcel,
   faSearch,
-  faToggleOff
+  faToggleOff,
+  faChevronLeft,
+  faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
 import DueñoModal from '../component/DueñoModal';
 import ConfirmModal from '../component/ConfirmModal';
@@ -21,6 +23,8 @@ const DueñosPage = () => {
   const [duenos, setDuenos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Estados para modales
   const [showModal, setShowModal] = useState(false);
@@ -46,7 +50,7 @@ const DueñosPage = () => {
 
   useEffect(() => { cargarDuenos(); }, []);
 
-  // --- LÓGICA DEL BUSCADOR (CORREGIDA) ---
+  // --- LÓGICA DEL BUSCADOR ---
   const duenosFiltrados = duenos.filter((d) => {
     const termino = busqueda.toLowerCase();
     // CORREGIDO: Manejo de nulos para evitar error toString()
@@ -60,6 +64,9 @@ const DueñosPage = () => {
       tel.includes(termino)
     );
   });
+
+  const totalPages = Math.ceil(duenosFiltrados.length / itemsPerPage);
+  const paginatedDuenos = duenosFiltrados.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // --- EXPORTAR A PDF ---
   const exportarPDF = () => {
@@ -171,8 +178,6 @@ const DueñosPage = () => {
         backgroundAttachment: 'fixed',
       }}
     >
-      {}
-      
       <div className="position-relative" style={{ zIndex: 2 }}>
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
           <h1 className="fw-bold text-white" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.8)' }}>
@@ -210,7 +215,7 @@ const DueñosPage = () => {
                 className="form-control border-0 py-2 ps-1 bg-transparent"
                 placeholder="Buscar por nombre, DNI o teléfono..."
                 value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
+                onChange={(e) => { setBusqueda(e.target.value); setCurrentPage(1); }}
                 style={{ boxShadow: 'none' }}
               />
             </div>
@@ -244,7 +249,7 @@ const DueñosPage = () => {
                   </td>
                 </tr>
               ) : (
-                duenosFiltrados.map((dueno) => (
+                paginatedDuenos.map((dueno) => (
                   <tr key={dueno.id}>
                     <td className="fw-bold">{dueno.nombre}</td>
                     <td>{dueno.dni}</td>
@@ -264,6 +269,30 @@ const DueñosPage = () => {
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="d-flex justify-content-center align-items-center mt-4 gap-3">
+            <button
+              className="btn btn-white rounded-circle shadow d-flex align-items-center justify-content-center border-0"
+              style={{ width: '50px', height: '50px', background: '#fff' }}
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => p - 1)}
+            >
+              <FontAwesomeIcon icon={faChevronLeft} className="text-primary" />
+            </button>
+            <div className="bg-white px-4 py-2 rounded-pill shadow fw-bold text-primary border">
+              Página {currentPage} de {totalPages}
+            </div>
+            <button
+              className="btn btn-white rounded-circle shadow d-flex align-items-center justify-content-center border-0"
+              style={{ width: '50px', height: '50px', background: '#fff' }}
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(p => p + 1)}
+            >
+              <FontAwesomeIcon icon={faChevronRight} className="text-primary" />
+            </button>
+          </div>
+        )}
       </div>
 
       <DueñoModal 

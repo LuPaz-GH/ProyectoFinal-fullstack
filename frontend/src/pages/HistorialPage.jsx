@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faHistory, faPencilAlt, faTrash, faSearch, faPaw, 
@@ -13,6 +14,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const HistorialPage = ({ user }) => {
+    const navigate = useNavigate();
     const [mascotas, setMascotas] = useState([]);
     const [busquedaMascotas, setBusquedaMascotas] = useState('');
     const [mascotaSeleccionada, setMascotaSeleccionada] = useState(null);
@@ -270,7 +272,7 @@ const HistorialPage = ({ user }) => {
                                 <button className="btn btn-danger rounded-pill px-3 shadow-sm" onClick={exportarPDFGeneral} title="Descargar PDF"><FontAwesomeIcon icon={faFilePdf} /></button>
                                 <button className="btn btn-success rounded-pill px-3 shadow-sm" onClick={exportarExcelGeneral} title="Descargar Excel"><FontAwesomeIcon icon={faFileExcel} /></button>
                                 <button className="btn btn-danger rounded-pill px-4 shadow text-white fw-bold" onClick={() => { setShowPapelera(true); cargarPapelera(); }}><FontAwesomeIcon icon={faEyeSlash} className="me-2" /> Inactivos</button>
-                                <button className="btn btn-light rounded-pill px-4 fw-bold shadow-sm" onClick={() => window.location.href='/mascotas'}>+ Nueva Mascota</button>
+                                <button className="btn btn-light rounded-pill px-4 fw-bold shadow-sm" onClick={() => navigate('/clientes')}>+ Nueva Mascota</button>
                             </div>
                         </div>
                         <div className="row g-4">
@@ -340,6 +342,101 @@ const HistorialPage = ({ user }) => {
                     </div>
                 )}
             </div>
+
+            {/* MODAL PAPELERA DE MASCOTAS */}
+            {showPapelera && (
+                <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 3000 }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                        <div className="modal-content rounded-4 border-0 shadow-lg">
+                            <div className="modal-header bg-danger text-white border-0">
+                                <h5 className="modal-title fw-bold"><FontAwesomeIcon icon={faEyeSlash} className="me-2" /> Mascotas Inactivas</h5>
+                                <button type="button" className="btn-close btn-close-white" onClick={() => setShowPapelera(false)}></button>
+                            </div>
+                            <div className="modal-body p-4">
+                                <input
+                                    type="text"
+                                    className="form-control rounded-pill mb-4"
+                                    placeholder="Buscar mascota o dueño..."
+                                    value={busquedaPapelera}
+                                    onChange={(e) => setBusquedaPapelera(e.target.value)}
+                                />
+                                {obtenerPapeleraMascotasFiltrada().length === 0 ? (
+                                    <p className="text-center text-muted py-4">No hay mascotas inactivas</p>
+                                ) : (
+                                    <div className="row g-3">
+                                        {obtenerPapeleraMascotasFiltrada().map(m => (
+                                            <div className="col-md-6" key={m.id}>
+                                                <div className="card border-0 shadow-sm rounded-4 p-3 d-flex flex-row align-items-center justify-content-between">
+                                                    <div>
+                                                        <div className="fw-bold">{m.nombre}</div>
+                                                        <small className="text-muted">Dueño: {m.dueno_nombre}</small>
+                                                    </div>
+                                                    <div className="d-flex gap-2">
+                                                        <button className="btn btn-sm btn-outline-success rounded-pill" title="Restaurar" onClick={() => restaurarMascota(m.id)}>
+                                                            <FontAwesomeIcon icon={faUndo} />
+                                                        </button>
+                                                        <button className="btn btn-sm btn-outline-danger rounded-pill" title="Eliminar definitivamente" onClick={() => { setIdToPermanentDelete(m.id); setPermanentDeleteType('mascota'); setShowConfirmPermanent(true); }}>
+                                                            <FontAwesomeIcon icon={faTrash} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL PAPELERA DE HISTORIAL */}
+            {showPapeleraHistorial && (
+                <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 3000 }}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                        <div className="modal-content rounded-4 border-0 shadow-lg">
+                            <div className="modal-header bg-warning text-dark border-0">
+                                <h5 className="modal-title fw-bold"><FontAwesomeIcon icon={faTrash} className="me-2" /> Registros Clínicos Inactivos</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowPapeleraHistorial(false)}></button>
+                            </div>
+                            <div className="modal-body p-4">
+                                <input
+                                    type="text"
+                                    className="form-control rounded-pill mb-4"
+                                    placeholder="Buscar por diagnóstico o tratamiento..."
+                                    value={busquedaPapelera}
+                                    onChange={(e) => setBusquedaPapelera(e.target.value)}
+                                />
+                                {obtenerPapeleraHistorialFiltrada().length === 0 ? (
+                                    <p className="text-center text-muted py-4">No hay registros inactivos</p>
+                                ) : (
+                                    <div className="d-flex flex-column gap-3">
+                                        {obtenerPapeleraHistorialFiltrada().map(h => (
+                                            <div className="card border-0 shadow-sm rounded-4 p-3" key={h.id}>
+                                                <div className="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <div className="fw-bold small text-muted mb-1">{h.fecha_formateada}</div>
+                                                        <div><span className="fw-bold">Diagnóstico:</span> {h.diagnostico}</div>
+                                                        <div><span className="fw-bold">Tratamiento:</span> {h.tratamiento}</div>
+                                                    </div>
+                                                    <div className="d-flex gap-2 ms-3">
+                                                        <button className="btn btn-sm btn-outline-success rounded-pill" title="Restaurar" onClick={() => restaurarRegistro(h.id)}>
+                                                            <FontAwesomeIcon icon={faUndo} />
+                                                        </button>
+                                                        <button className="btn btn-sm btn-outline-danger rounded-pill" title="Eliminar definitivamente" onClick={() => { setIdToPermanentDelete(h.id); setPermanentDeleteType('historial'); setShowConfirmPermanent(true); }}>
+                                                            <FontAwesomeIcon icon={faTrash} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <ConfirmModal show={showConfirmPermanent} onClose={() => { setShowConfirmPermanent(false); setIdToPermanentDelete(null); }} onConfirm={handleConfirmarEliminarPermanente} title="¿Eliminar definitivamente?" message="Esta acción no se puede deshacer." confirmText="Sí, eliminar" confirmColor="danger" />
             <ConfirmModal show={showConfirm} onClose={() => setShowConfirm(false)} onConfirm={handleEliminar} title={deleteType === 'mascota' ? "¿Desactivar esta mascota?" : "¿Desactivar este registro?"} message="Se moverá a Inactivos y podrás restaurarlo más tarde." confirmText="Sí, desactivar" confirmColor="danger" />

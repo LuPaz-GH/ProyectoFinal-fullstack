@@ -15,7 +15,13 @@ import {
   faTrashRestore,
   faTimes,
   faChevronLeft,
-  faChevronRight
+  faChevronRight,
+  faBell,
+  faLock,
+  faUserEdit,
+  faXmark,
+  faEyeSlash,
+  faEye
 } from '@fortawesome/free-solid-svg-icons';
 import ConfirmModal from '../component/ConfirmModal';
 
@@ -37,16 +43,71 @@ const GestionEmpleados = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
 
+  // Estados para modal de reset de contraseña
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetEmpleado, setResetEmpleado] = useState(null);
+  const [nuevaClave, setNuevaClave] = useState('');
+  const [mostrarClave, setMostrarClave] = useState(false);
+
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
   // ✅ ESTADOS PARA PAGINACIÓN
   const [paginaActual, setPaginaActual] = useState(1);
-  const [empleadosPorPagina] = useState(5); // Mostramos 5 empleados por página
+  const [empleadosPorPagina] = useState(5);
+
+  // Estados para notificaciones de credenciales
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [showNotificaciones, setShowNotificaciones] = useState(false);
+
+  const getNotifVistas = () => JSON.parse(localStorage.getItem('notif_credenciales_vistas') || '[]');
+
+  const fetchNotificaciones = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:3001/api/auditoria/credenciales-empleados', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        const vistas = getNotifVistas();
+        setNotificaciones((data.datos || []).filter(n => !vistas.includes(n.id)));
+      }
+    } catch (err) {
+      console.error('Error cargando notificaciones:', err);
+    }
+  };
+
+  const descartarNotificacion = (id) => {
+    const vistas = getNotifVistas();
+    localStorage.setItem('notif_credenciales_vistas', JSON.stringify([...vistas, id]));
+    setNotificaciones(prev => prev.filter(n => n.id !== id));
+  };
+
+  const descartarTodas = () => {
+    const vistas = getNotifVistas();
+    const nuevasVistas = [...vistas, ...notificaciones.map(n => n.id)];
+    localStorage.setItem('notif_credenciales_vistas', JSON.stringify(nuevasVistas));
+    setNotificaciones([]);
+    setShowNotificaciones(false);
+  };
+
+  const parsearNotificacion = (producto) => {
+    const match = producto?.match(/Empleado: (.+?) \| Cambios: (.+)/);
+    const cambios = match?.[2] || producto || '';
+    const esPassword = cambios.toLowerCase().includes('contraseña');
+    const esUsuario = cambios.toLowerCase().includes('usuario');
+    return {
+      empleado: match?.[1] || 'Empleado',
+      tipo: esPassword && esUsuario ? 'Usuario y contraseña' : esPassword ? 'Contraseña' : 'Usuario',
+      icono: esPassword ? faLock : faUserEdit,
+    };
+  };
 
   useEffect(() => {
     fetchEmpleados();
     fetchEliminados();
+    fetchNotificaciones();
   }, []);
 
   const fetchEmpleados = async () => {
@@ -74,25 +135,32 @@ const GestionEmpleados = () => {
     }
   };
 
-  const resetPassword = (id, nombre) => {
-    const nuevaClave = prompt(`Nueva contraseña temporal para ${nombre}:`);
-    if (!nuevaClave || nuevaClave.trim() === '') return;
-    const token = localStorage.getItem('token');
-    fetch(`http://localhost:3001/api/empleados/${id}`, {
-      method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ password: nuevaClave })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Error al resetear');
-        setSuccessMessage(`Contraseña de ${nombre} reseteada.`);
-        setShowSuccessModal(true);
-        fetchEmpleados();
-      })
-      .catch(err => alert(err.message));
+  const abrirResetModal = (emp) => {
+    setResetEmpleado(emp);
+    setNuevaClave('');
+    setMostrarClave(false);
+    setShowResetModal(true);
+  };
+
+  const confirmarResetPassword = async () => {
+    if (!nuevaClave.trim()) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`http://localhost:3001/api/empleados/${resetEmpleado.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ password: nuevaClave })
+      });
+      if (!res.ok) throw new Error('Error al resetear');
+      setShowResetModal(false);
+      setResetEmpleado(null);
+      setNuevaClave('');
+      setSuccessMessage(`Contraseña de ${resetEmpleado.nombre} actualizada.`);
+      setShowSuccessModal(true);
+      fetchEmpleados();
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   const guardarEmpleado = async (e) => {
@@ -224,9 +292,70 @@ const GestionEmpleados = () => {
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0, 0, 0, 0.2)', zIndex: 0 }} />
 
       <div className="position-relative" style={{ zIndex: 1 }}>
-        <h1 className="fw-bold text-white mb-4" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.6)' }}>
-          <FontAwesomeIcon icon={faUsers} className="me-2" /> Gestión de Empleados
-        </h1>
+        <div className="d-flex align-items-center justify-content-between mb-4">
+          <h1 className="fw-bold text-white mb-0" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.6)' }}>
+            <FontAwesomeIcon icon={faUsers} className="me-2" /> Gestión de Empleados
+          </h1>
+
+          {/* CAMPANA DE NOTIFICACIONES */}
+          <div className="position-relative">
+            <button
+              className="btn btn-white rounded-circle shadow d-flex align-items-center justify-content-center border-0"
+              style={{ width: '50px', height: '50px', background: 'white' }}
+              onClick={() => setShowNotificaciones(v => !v)}
+              title="Notificaciones de credenciales"
+            >
+              <FontAwesomeIcon icon={faBell} className={notificaciones.length > 0 ? 'text-warning' : 'text-secondary'} style={{ fontSize: '20px' }} />
+              {notificaciones.length > 0 && (
+                <span className="position-absolute top-0 end-0 badge rounded-pill bg-danger" style={{ fontSize: '10px' }}>
+                  {notificaciones.length}
+                </span>
+              )}
+            </button>
+
+            {showNotificaciones && (
+              <div className="position-absolute end-0 mt-2 shadow-lg rounded-4 border-0 bg-white"
+                   style={{ width: '360px', zIndex: 3000, maxHeight: '420px', overflowY: 'auto' }}>
+                <div className="d-flex justify-content-between align-items-center px-4 py-3 border-bottom">
+                  <span className="fw-bold text-dark">Cambios de credenciales</span>
+                  {notificaciones.length > 0 && (
+                    <button className="btn btn-sm btn-link text-danger p-0 text-decoration-none fw-bold" onClick={descartarTodas}>
+                      Descartar todas
+                    </button>
+                  )}
+                </div>
+
+                {notificaciones.length === 0 ? (
+                  <div className="text-center text-muted py-4 px-3">
+                    <FontAwesomeIcon icon={faBell} size="2x" className="mb-2 text-secondary" />
+                    <p className="mb-0 small">Sin notificaciones nuevas</p>
+                  </div>
+                ) : (
+                  notificaciones.map(n => {
+                    const info = parsearNotificacion(n.producto);
+                    return (
+                      <div key={n.id} className="d-flex align-items-start gap-3 px-4 py-3 border-bottom hover-bg"
+                           style={{ background: '#fffbf0' }}>
+                        <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                             style={{ width: '38px', height: '38px', background: '#fff3cd' }}>
+                          <FontAwesomeIcon icon={info.icono} className="text-warning" />
+                        </div>
+                        <div className="flex-grow-1">
+                          <div className="fw-bold text-dark small">{info.empleado}</div>
+                          <div className="text-muted small">cambió su <span className="text-danger fw-bold">{info.tipo.toLowerCase()}</span></div>
+                          <div className="text-muted" style={{ fontSize: '11px' }}>{n.fecha_formateada} · por {n.responsable}</div>
+                        </div>
+                        <button className="btn btn-sm p-0 text-muted" onClick={() => descartarNotificacion(n.id)} title="Descartar">
+                          <FontAwesomeIcon icon={faXmark} />
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         <div className="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -275,7 +404,7 @@ const GestionEmpleados = () => {
                     <td>{emp.usuario}</td>
                     <td>{getRolBadge(emp.rol)}</td>
                     <td className="text-end pe-4">
-                      <button className="btn btn-sm btn-outline-warning me-2 rounded-circle" onClick={() => resetPassword(emp.id, emp.nombre)} style={{width:'35px', height:'35px', backgroundColor: 'white'}}><FontAwesomeIcon icon={faKey}/></button>
+                      <button className="btn btn-sm btn-outline-warning me-2 rounded-circle" onClick={() => abrirResetModal(emp)} style={{width:'35px', height:'35px', backgroundColor: 'white'}}><FontAwesomeIcon icon={faKey}/></button>
                       <button className="btn btn-sm btn-outline-primary me-2 rounded-circle" onClick={() => { setEmpleadoEdit(emp); setForm({nombre:emp.nombre, usuario:emp.usuario, email: emp.email || '', password:'', rol:emp.rol}); setShowModal(true); }} style={{width:'35px', height:'35px', backgroundColor: 'white'}}><FontAwesomeIcon icon={faPencilAlt}/></button>
                       <button className="btn btn-sm btn-outline-danger rounded-circle" onClick={() => { setIdToDelete(emp.id); setShowConfirm(true); }} style={{width:'35px', height:'35px', backgroundColor: 'white'}}><FontAwesomeIcon icon={faTrash}/></button>
                     </td>
@@ -422,6 +551,68 @@ const GestionEmpleados = () => {
               <h4 className="fw-bold text-success">¡Éxito!</h4>
               <p className="text-muted">{successMessage}</p>
               <button className="btn btn-success px-5 py-2 rounded-pill fw-bold" onClick={() => setShowSuccessModal(false)}>Aceptar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL RESET CONTRASEÑA */}
+      {showResetModal && (
+        <div className="modal fade show d-block" style={{ background: 'rgba(0,0,0,0.6)', zIndex: 2500 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+              <div className="modal-header border-0 px-4 pt-4 pb-0">
+                <div className="d-flex align-items-center gap-3">
+                  <div className="rounded-circle d-flex align-items-center justify-content-center"
+                       style={{ width: '48px', height: '48px', background: '#fff3cd' }}>
+                    <FontAwesomeIcon icon={faKey} className="text-warning" style={{ fontSize: '20px' }} />
+                  </div>
+                  <div>
+                    <h5 className="modal-title fw-bold mb-0">Cambiar contraseña</h5>
+                    <small className="text-muted">{resetEmpleado?.nombre}</small>
+                  </div>
+                </div>
+                <button type="button" className="btn-close" onClick={() => setShowResetModal(false)}></button>
+              </div>
+
+              <div className="modal-body px-4 py-4">
+                <label className="form-label fw-bold small text-muted text-uppercase">Nueva contraseña temporal</label>
+                <div className="input-group">
+                  <input
+                    type={mostrarClave ? 'text' : 'password'}
+                    className="form-control border-end-0 rounded-start-pill py-3"
+                    placeholder="Ingresá la nueva contraseña..."
+                    value={nuevaClave}
+                    onChange={(e) => setNuevaClave(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && confirmarResetPassword()}
+                    autoFocus
+                  />
+                  <button
+                    className="btn btn-outline-secondary border-start-0 rounded-end-pill px-3"
+                    type="button"
+                    onClick={() => setMostrarClave(v => !v)}
+                    style={{ background: 'white' }}
+                  >
+                    <FontAwesomeIcon icon={mostrarClave ? faEyeSlash : faEye} className="text-muted" />
+                  </button>
+                </div>
+                {nuevaClave.length > 0 && nuevaClave.length < 6 && (
+                  <small className="text-danger mt-1 d-block">La contraseña debe tener al menos 6 caracteres</small>
+                )}
+              </div>
+
+              <div className="modal-footer border-0 px-4 pb-4 gap-2">
+                <button className="btn btn-light rounded-pill px-4 fw-bold" onClick={() => setShowResetModal(false)}>
+                  Cancelar
+                </button>
+                <button
+                  className="btn btn-warning rounded-pill px-4 fw-bold text-dark"
+                  onClick={confirmarResetPassword}
+                  disabled={nuevaClave.trim().length < 6}
+                >
+                  <FontAwesomeIcon icon={faKey} className="me-2" /> Guardar contraseña
+                </button>
+              </div>
             </div>
           </div>
         </div>
