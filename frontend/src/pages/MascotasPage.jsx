@@ -9,7 +9,7 @@ import {
 // --- COMPONENTE DE CONFIRMACIÓN IMPORTADO ---
 import ConfirmModal from '../component/ConfirmModal'; 
 
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';  // ← AXIOS CON TOKEN AUTOMÁTICO
@@ -76,15 +76,14 @@ const MascotasPage = () => {
   };
 
   const exportarPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Veterinaria Malfi - Reporte de Pacientes", 14, 20);
-    autoTable(doc, {
-      startY: 30,
-      head: [['Nombre', 'Dueño', 'Especie', 'Raza']],
-      body: mascotasFiltradas.map(m => [m.nombre, m.dueno_nombre, m.especie, m.raza || 'Mestizo']),
-      headStyles: { fillColor: [102, 51, 153] }
+    exportarPDFEstilizado({
+      titulo: 'Reporte de Pacientes - Malfi Veterinaria',
+      columnas: ['Nombre', 'Dueno', 'Especie', 'Raza'],
+      filas: mascotasFiltradas.map(m => [m.nombre, m.dueno_nombre, m.especie, m.raza || 'Mestizo']),
+      filename: 'Pacientes_Malfi.pdf',
+      headerColor: [230, 126, 34],
+      accentColor: [241, 196, 15]
     });
-    doc.save("Pacientes_Malfi.pdf");
   };
 
   const handleVerDetalle = (m) => {

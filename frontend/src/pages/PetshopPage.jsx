@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import ConfirmModal from '../component/ConfirmModal';
 import ProductoModal from '../component/ProductoModal';
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
@@ -157,14 +157,14 @@ const PetshopPage = () => {
     };
 
     const exportarPDF = () => {
-        const doc = new jsPDF();
-        doc.text("Petshop - Malfi Veterinaria", 14, 20);
-        autoTable(doc, {
-            startY: 30,
-            head: [['Nombre', 'Precio', 'Stock']],
-            body: productos.map(p => [p.nombre, `$${p.precio_venta}`, p.stock])
+        exportarPDFEstilizado({
+            titulo: 'Petshop - Malfi Veterinaria',
+            columnas: ['Nombre', 'Precio', 'Stock'],
+            filas: productos.map(p => [p.nombre, `$${p.precio_venta}`, p.stock]),
+            filename: 'Stock_Petshop_Malfi.pdf',
+            headerColor: [22, 160, 133],
+            accentColor: [26, 188, 156]
         });
-        doc.save("Stock_Petshop_Malfi.pdf");
     };
 
     const getStockBadge = (cantidad) => {

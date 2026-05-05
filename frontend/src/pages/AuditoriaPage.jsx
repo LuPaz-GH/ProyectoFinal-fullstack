@@ -14,7 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import api from '../services/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 
 const AuditoriaPage = ({ user }) => {
   const [movimientos, setMovimientos] = useState([]);
@@ -23,12 +23,13 @@ const AuditoriaPage = ({ user }) => {
   const [pagina, setPagina] = useState(1);
   const [limite, setLimite] = useState(25);
   const [orden, setOrden] = useState({ campo: 'fecha', direccion: 'DESC' });
-  const [filtros, setFiltros] = useState({ 
-    buscar: '', 
-    periodo: 'todo', 
-    categoria: '', 
-    accion: '', 
-    mostrarEliminados: false 
+  const [filtros, setFiltros] = useState({
+    buscar: '',
+    fechaEspecifica: new Date().toISOString().split('T')[0],
+    filtroEmpleado: '',
+    categoria: '',
+    accion: '',
+    mostrarEliminados: false
   });
 
   const [showEditModal, setShowEditModal] = useState(false);
@@ -56,46 +57,24 @@ const AuditoriaPage = ({ user }) => {
     try {
       const currentPagina = pageOverride || pagina;
 
-      let fechaDesde = '';
-      let fechaHasta = '';
-      const hoy = new Date();
-
-      if (filtros.periodo === 'hoy') {
-        fechaDesde = hoy.toISOString().split('T')[0];
-        fechaHasta = fechaDesde;
-      } else if (filtros.periodo === 'semana') {
-        const haceUnaSemana = new Date();
-        haceUnaSemana.setDate(hoy.getDate() - 7);
-        fechaDesde = haceUnaSemana.toISOString().split('T')[0];
-        fechaHasta = hoy.toISOString().split('T')[0];
-      } else if (filtros.periodo === 'mes') {
-        fechaDesde = new Date(hoy.getFullYear(), hoy.getMonth(), 1).toISOString().split('T')[0];
-        fechaHasta = hoy.toISOString().split('T')[0];
-      }
-
       const params = {
         pagina: currentPagina,
         limite: limite,
         buscar: filtros.buscar || undefined,
         modulo: filtros.categoria || undefined,
         accion: filtros.accion || undefined,
-        fechaDesde: fechaDesde || undefined,
-        fechaHasta: fechaHasta || undefined,
+        fechaDesde: filtros.fechaEspecifica || undefined,
+        fechaHasta: filtros.fechaEspecifica || undefined,
+        responsableFiltro: filtros.filtroEmpleado || undefined,
         orden: orden.campo,
         direccion: orden.direccion,
         mostrarEliminados: filtros.mostrarEliminados ? 'true' : 'false'
       };
 
-      console.log('🔍 Parámetros de búsqueda:', params);
-      
       const res = await api.get('/auditoria/historial', { params });
-      
-      console.log('📊 Registros recibidos:', res.data.datos?.length || 0);
-      console.log('Primeros registros:', res.data.datos?.slice(0, 3));
-      
       setMovimientos(res.data.datos || []);
       setTotalRegistros(res.data.total || 0);
-      
+
     } catch (err) {
       console.error("❌ Error en cargarHistorial:", err.response?.data || err);
       toast.error('Error al cargar el historial');
@@ -227,15 +206,15 @@ const AuditoriaPage = ({ user }) => {
   };
   
   const limpiarFiltros = () => {
-    setFiltros({ 
-      buscar: '', 
-      periodo: 'todo', 
-      categoria: '', 
-      accion: '', 
-      mostrarEliminados: false 
+    setFiltros({
+      buscar: '',
+      fechaEspecifica: new Date().toISOString().split('T')[0],
+      filtroEmpleado: '',
+      categoria: '',
+      accion: '',
+      mostrarEliminados: false
     });
     setPagina(1);
-    cargarHistorial(1);
   };
 
   const exportarExcel = async () => {
@@ -277,20 +256,20 @@ const AuditoriaPage = ({ user }) => {
   };
 
   const exportarPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Historial de Auditoría", 14, 20);
-    autoTable(doc, {
-      startY: 25,
-      head: [['Fecha', 'Módulo', 'Acción', 'Elemento Afectado', 'Responsable']],
-      body: movimientos.map(m => [
-        new Date(m.fecha).toLocaleString('es-AR'), 
-        m.modulo || '-', 
+    exportarPDFEstilizado({
+      titulo: 'Historial de Auditoria - Malfi Veterinaria',
+      columnas: ['Fecha', 'Modulo', 'Accion', 'Elemento Afectado', 'Responsable'],
+      filas: movimientos.map(m => [
+        new Date(m.fecha).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        m.modulo || '-',
         m.accion || '-',
-        m.producto || m.servicio || '-',
+        getElementoAfectado(m),
         m.responsable || '-'
-      ])
+      ]),
+      filename: 'Auditoria_Malfi.pdf',
+      headerColor: [44, 62, 80],
+      accentColor: [52, 152, 219]
     });
-    doc.save("Auditoria.pdf");
   };
 
   const renderAccion = (accion, eliminado) => {
@@ -328,6 +307,68 @@ const AuditoriaPage = ({ user }) => {
     if (m.modulo === 'turnos' || m.modulo === 'estetica') return m.producto || m.servicio || 'Turno registrado';
     if (m.modulo === 'historial') return m.producto || 'Consulta registrada';
     return m.producto || m.servicio || m.nombre || '-';
+  };
+
+  const descargarPDFRegistro = (m) => {
+    const doc = new jsPDF({ unit: 'mm', format: 'a5' });
+    const W = doc.internal.pageSize.getWidth();
+
+    // Header
+    doc.setFillColor(44, 62, 80);
+    doc.rect(0, 0, W, 28, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text('MALFI VETERINARIA', W / 2, 11, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text('Registro de Auditoria', W / 2, 18, { align: 'center' });
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.3);
+    doc.line(10, 23, W - 10, 23);
+
+    // Body
+    doc.setTextColor(50, 50, 50);
+    let y = 36;
+    const labelX = 12;
+    const valX = 52;
+    const lineH = 10;
+
+    const campo = (label, valor) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(120, 120, 120);
+      doc.text(label, labelX, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(30, 30, 30);
+      doc.setFontSize(9);
+      const lines = doc.splitTextToSize(String(valor || '—'), W - valX - 10);
+      doc.text(lines, valX, y);
+      y += lineH * lines.length;
+    };
+
+    campo('Módulo:', (m.modulo || '-').toUpperCase());
+    campo('Acción:', m.accion || '-');
+    campo('Elemento:', getElementoAfectado(m));
+    campo('Responsable:', m.responsable || '-');
+    campo('Fecha:', new Date(m.fecha).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+    if (m.mascota) campo('Mascota:', m.mascota);
+    if (m.servicio) campo('Servicio:', m.servicio);
+    if (m.precio_venta) campo('Precio:', `$${m.precio_venta}`);
+    if (m.stock) campo('Stock:', m.stock);
+
+    // Footer
+    y += 6;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(labelX, y, W - labelX, y);
+    y += 6;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7.5);
+    doc.setTextColor(160, 160, 160);
+    doc.text(`ID: ${m.id || '-'}  -  Generado el ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}`, W / 2, y, { align: 'center' });
+
+    doc.save(`Auditoria_Registro_${m.id || Date.now()}.pdf`);
   };
 
   const totalPaginas = Math.ceil(totalRegistros / limite);
@@ -380,46 +421,104 @@ const AuditoriaPage = ({ user }) => {
         </div>
 
         {/* Filtros */}
-        <div className="card border-0 shadow-lg rounded-4 mb-4" style={{ 
-          background: 'rgba(255, 255, 255, 0.85)', 
+        <div className="card border-0 shadow-lg rounded-4 mb-4" style={{
+          background: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255, 255, 255, 0.3)'
         }}>
           <div className="card-body p-4">
             <div className="row g-3 align-items-center">
-              <div className="col-md-4">
+
+              {/* Fecha */}
+              <div className="col-md-2">
+                <input
+                  type="date"
+                  className="form-control rounded-pill border shadow-sm py-2"
+                  name="fechaEspecifica"
+                  value={filtros.fechaEspecifica}
+                  onChange={handleFiltroChange}
+                />
+              </div>
+
+              {/* Botones rápidos de fecha */}
+              <div className="col-md-2 d-flex gap-2">
+                <button
+                  className="btn btn-outline-primary rounded-pill px-3 py-2 small fw-bold"
+                  onClick={() => { setFiltros(f => ({ ...f, fechaEspecifica: new Date().toISOString().split('T')[0] })); setPagina(1); }}
+                >
+                  Hoy
+                </button>
+                <button
+                  className="btn btn-outline-secondary rounded-pill px-3 py-2 small fw-bold"
+                  onClick={() => { setFiltros(f => ({ ...f, fechaEspecifica: '' })); setPagina(1); }}
+                >
+                  Ver todo
+                </button>
+              </div>
+
+              {/* Búsqueda por cliente / concepto */}
+              <div className="col-md-3">
                 <div className="input-group rounded-pill overflow-hidden border shadow-sm">
-                  <span className="input-group-text bg-white border-0 ps-4 text-muted">
+                  <span className="input-group-text bg-white border-0 ps-3 text-muted">
                     <FontAwesomeIcon icon={faSearch} />
                   </span>
-                  <input 
-                    type="text" 
-                    className="form-control border-0 py-2" 
-                    placeholder="Buscar registro..." 
-                    name="buscar" 
-                    value={filtros.buscar} 
+                  <input
+                    type="text"
+                    className="form-control border-0 py-2"
+                    placeholder="Buscar por cliente / concepto..."
+                    name="buscar"
+                    value={filtros.buscar}
                     onChange={handleFiltroChange}
                     onKeyPress={(e) => e.key === 'Enter' && aplicarFiltros()}
                   />
+                  {filtros.buscar && (
+                    <button className="btn btn-white border-0 px-3 text-muted" onClick={() => setFiltros(f => ({ ...f, buscar: '' }))}>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div className="col-md-3">
+              {/* Búsqueda por empleado */}
+              <div className="col-md-2">
+                <div className="input-group rounded-pill overflow-hidden border shadow-sm">
+                  <span className="input-group-text bg-white border-0 ps-3 text-muted">
+                    <FontAwesomeIcon icon={faUser} />
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control border-0 py-2"
+                    placeholder="Empleado..."
+                    name="filtroEmpleado"
+                    value={filtros.filtroEmpleado}
+                    onChange={handleFiltroChange}
+                    onKeyPress={(e) => e.key === 'Enter' && aplicarFiltros()}
+                  />
+                  {filtros.filtroEmpleado && (
+                    <button className="btn btn-white border-0 px-3 text-muted" onClick={() => setFiltros(f => ({ ...f, filtroEmpleado: '' }))}>
+                      <FontAwesomeIcon icon={faTimes} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Módulo y acción */}
+              <div className="col-md-1">
                 <select className="form-select rounded-pill border shadow-sm" name="categoria" value={filtros.categoria} onChange={handleFiltroChange}>
-                  <option value="">Todos los módulos</option>
-                  <option value="productos">📦 Productos</option>
-                  <option value="clientes">👥 Clientes</option>
-                  <option value="mascotas">🐾 Mascotas</option>
-                  <option value="caja">💰 Caja</option>
-                  <option value="turnos">📅 Turnos</option>
-                  <option value="historial">🏥 Historial</option>
-                  <option value="empleados">👔 Empleados</option>
+                  <option value="">Módulo</option>
+                  <option value="productos">Productos</option>
+                  <option value="clientes">Clientes</option>
+                  <option value="mascotas">Mascotas</option>
+                  <option value="caja">Caja</option>
+                  <option value="turnos">Turnos</option>
+                  <option value="historial">Historial</option>
+                  <option value="empleados">Empleados</option>
                 </select>
               </div>
 
-              <div className="col-md-2">
+              <div className="col-md-1">
                 <select className="form-select rounded-pill border shadow-sm" name="accion" value={filtros.accion} onChange={handleFiltroChange}>
-                  <option value="">Acciones</option>
+                  <option value="">Acción</option>
                   <option value="Creado">Creado</option>
                   <option value="Editado">Editado</option>
                   <option value="Eliminado">Eliminado</option>
@@ -427,13 +526,30 @@ const AuditoriaPage = ({ user }) => {
                 </select>
               </div>
 
-              <div className="col-md-3 d-flex gap-2 align-items-center justify-content-end">
-                <div className="form-check form-switch mb-0 me-2">
+              {/* Switch papelera + Limpiar */}
+              <div className="col-md-1 d-flex gap-2 align-items-center justify-content-end">
+                <div className="form-check form-switch mb-0">
                   <input className="form-check-input" type="checkbox" name="mostrarEliminados" id="switchEliminados" checked={filtros.mostrarEliminados} onChange={handleFiltroChange} />
                   <label className="form-check-label text-dark small fw-bold" htmlFor="switchEliminados">Papelera</label>
                 </div>
-                <button className="btn btn-outline-secondary rounded-pill btn-sm px-3" onClick={limpiarFiltros}>Limpiar</button>
               </div>
+              <div className="col-md-12 d-flex justify-content-end">
+                <button className="btn btn-outline-secondary rounded-pill btn-sm px-4" onClick={limpiarFiltros}>Limpiar filtros</button>
+              </div>
+
+            </div>
+
+            {/* Texto descriptivo del filtro activo */}
+            <div className="mt-2 ps-1">
+              <small className="text-muted fst-italic">
+                {!filtros.fechaEspecifica && !filtros.buscar && !filtros.filtroEmpleado
+                  ? '📋 Mostrando todo el historial'
+                  : !filtros.fechaEspecifica
+                  ? `🔍 Buscando en todo el historial${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`
+                  : filtros.fechaEspecifica === new Date().toISOString().split('T')[0]
+                  ? `📅 Mostrando registros de hoy${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`
+                  : `📅 Mostrando registros del ${filtros.fechaEspecifica}${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`}
+              </small>
             </div>
           </div>
         </div>
@@ -481,16 +597,24 @@ const AuditoriaPage = ({ user }) => {
                       <td className="text-center pe-4">
                         <div className="d-flex justify-content-center gap-2">
                           {m.eliminado == 1 ? (
-                            <button className="btn btn-success btn-sm rounded-pill px-3 shadow-sm fw-bold" onClick={() => handleRestaurar(m)}>
-                              <FontAwesomeIcon icon={faUndo} className="me-1" /> Restaurar
-                            </button>
+                            <>
+                              <button className="btn btn-success btn-sm rounded-pill px-3 shadow-sm fw-bold" onClick={() => handleRestaurar(m)}>
+                                <FontAwesomeIcon icon={faUndo} className="me-1" /> Restaurar
+                              </button>
+                              <button className="btn btn-outline-danger btn-sm rounded-circle shadow-sm" title="Descargar PDF" style={{width: '32px', height: '32px'}} onClick={() => descargarPDFRegistro(m)}>
+                                <FontAwesomeIcon icon={faFilePdf} />
+                              </button>
+                            </>
                           ) : (
                             <>
-                              <button className="btn btn-outline-primary btn-sm rounded-circle shadow-sm" style={{width: '32px', height: '32px'}} onClick={() => handleEditar(m)}>
+                              <button className="btn btn-outline-primary btn-sm rounded-circle shadow-sm" title="Editar" style={{width: '32px', height: '32px'}} onClick={() => handleEditar(m)}>
                                 <FontAwesomeIcon icon={faEdit} />
                               </button>
                               <button className="btn btn-outline-danger btn-sm rounded-circle shadow-sm" title="Desactivar" style={{width: '32px', height: '32px'}} onClick={() => handleBorrarClick(m)}>
                                 <FontAwesomeIcon icon={faToggleOff} />
+                              </button>
+                              <button className="btn btn-outline-secondary btn-sm rounded-circle shadow-sm" title="Descargar PDF" style={{width: '32px', height: '32px'}} onClick={() => descargarPDFRegistro(m)}>
+                                <FontAwesomeIcon icon={faFilePdf} />
                               </button>
                             </>
                           )}

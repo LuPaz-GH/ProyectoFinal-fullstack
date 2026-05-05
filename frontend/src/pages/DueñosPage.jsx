@@ -16,7 +16,7 @@ import DueñoModal from '../component/DueñoModal';
 import ConfirmModal from '../component/ConfirmModal';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 
 const DueñosPage = () => {
   // Estados principales
@@ -70,36 +70,14 @@ const DueñosPage = () => {
 
   // --- EXPORTAR A PDF ---
   const exportarPDF = () => {
-    try {
-      const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text("Malfi Veterinaria - Reporte de Dueños", 14, 20);
-      doc.setFontSize(11);
-      doc.setTextColor(100);
-      doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 14, 28);
-
-      const tableColumn = ["Nombre", "DNI", "Teléfono", "Dirección"];
-      const tableRows = duenosFiltrados.map(d => [
-        d.nombre,
-        d.dni,
-        d.telefono || '-',
-        d.direccion || '-'
-      ]);
-
-      autoTable(doc, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 35,
-        theme: 'grid',
-        headStyles: { fillColor: [102, 51, 153] }, 
-        styles: { fontSize: 10 },
-      });
-
-      doc.save(`dueños_malfi_${Date.now()}.pdf`);
-    } catch (error) {
-      console.error("Error al generar PDF:", error);
-      alert("Error al generar el PDF.");
-    }
+    exportarPDFEstilizado({
+      titulo: 'Reporte de Duenos - Malfi Veterinaria',
+      columnas: ['Nombre', 'DNI', 'Telefono', 'Direccion'],
+      filas: duenosFiltrados.map(d => [d.nombre, d.dni, d.telefono || '-', d.direccion || '-']),
+      filename: `Duenos_Malfi_${Date.now()}.pdf`,
+      headerColor: [44, 62, 80],
+      accentColor: [142, 68, 173]
+    });
   };
 
   // --- EXPORTAR A EXCEL ---

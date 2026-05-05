@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import ConfirmModal from '../component/ConfirmModal';
 import ProductoModal from '../component/ProductoModal';
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
@@ -170,18 +170,13 @@ const AlimentosPage = () => {
     };
 
     const exportarPDF = () => {
-        const doc = new jsPDF();
-        doc.text("Inventario de Alimentos - Malfi", 14, 20);
-        autoTable(doc, {
-            startY: 30,
-            head: [['Nombre', 'Precio', 'Stock', 'Vencimiento']],
-            body: alimentos.map(a => [
-                a.nombre,
-                `$${a.precio_venta}`,
-                a.stock,
-                a.vencimiento_alimento ? new Date(a.vencimiento_alimento).toLocaleDateString() : 'N/A'
-            ]),
-            headStyles: { fillColor: [40, 167, 69] }
+        exportarPDFEstilizado({
+            titulo: 'Inventario de Alimentos - Malfi Veterinaria',
+            columnas: ['Nombre', 'Precio', 'Stock', 'Vencimiento'],
+            filas: alimentos.map(a => [a.nombre, `$${a.precio_venta}`, a.stock, a.vencimiento_alimento ? new Date(a.vencimiento_alimento).toLocaleDateString() : 'N/A']),
+            filename: 'Stock_Alimentos_Malfi.pdf',
+            headerColor: [211, 84, 0],
+            accentColor: [243, 156, 18]
         });
         doc.save("Stock_Alimentos_Malfi.pdf");
     };

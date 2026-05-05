@@ -10,7 +10,7 @@ import {
 import ConfirmModal from '../component/ConfirmModal';
 import api from '../services/api';
 // Librerías de exportación
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -357,20 +357,22 @@ const TurnosPage = ({ user }) => {
         });
     };
     const exportarPDFGeneral = () => {
-        const doc = new jsPDF();
-        doc.text(`Reporte de Agenda - ${filtroFecha.toUpperCase()}`, 14, 15);
-        const columns = ["Fecha", "Hora", "Mascota", "Dueño", "Veterinario", "Tipo", "Duración"];
-        const rows = obtenerTurnosProcesados().map(t => [
-            new Date(t.fecha).toLocaleDateString(),
-            new Date(t.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            t.mascota_nombre,
-            t.dueno_nombre,
-            t.veterinario_nombre || 'Aleatorio',
-            t.tipo.toUpperCase(),
-            `${t.duracion || 15} min`
-        ]);
-        autoTable(doc, { head: [columns], body: rows, startY: 20, theme: 'striped' });
-        doc.save(`Agenda_Turnos_${filtroFecha}.pdf`);
+        exportarPDFEstilizado({
+            titulo: `Agenda de Turnos - ${filtroFecha.toUpperCase()}`,
+            columnas: ['Fecha', 'Hora', 'Mascota', 'Dueno', 'Veterinario', 'Tipo', 'Duracion'],
+            filas: obtenerTurnosProcesados().map(t => [
+                new Date(t.fecha).toLocaleDateString(),
+                new Date(t.fecha).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                t.mascota_nombre,
+                t.dueno_nombre,
+                t.veterinario_nombre || 'Aleatorio',
+                t.tipo.toUpperCase(),
+                `${t.duracion || 15} min`
+            ]),
+            filename: `Agenda_Turnos_${filtroFecha}.pdf`,
+            headerColor: [84, 110, 122],
+            accentColor: [69, 179, 157]
+        });
     };
     const formatearFechaTitulo = (fechaStr) => {
         const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -691,6 +693,12 @@ const TurnosPage = ({ user }) => {
                         <FontAwesomeIcon icon={faCalendarCheck} className="me-3" /> Agenda Veterinaria
                     </h1>
                     <div className="d-flex gap-2 align-items-center">
+                        <button className="btn btn-danger rounded-circle shadow-sm" style={{width:'42px', height:'42px'}} onClick={exportarPDFGeneral} title="Exportar PDF">
+                            <FontAwesomeIcon icon={faFilePdf}/>
+                        </button>
+                        <button className="btn btn-success rounded-circle shadow-sm" style={{width:'42px', height:'42px'}} onClick={exportarExcel} title="Exportar Excel">
+                            <FontAwesomeIcon icon={faFileExcel}/>
+                        </button>
                         <button className="btn btn-danger rounded-pill px-4 fw-bold shadow" onClick={() => { setTurnoSeleccionado(null); setShowAtencion(true); }}>
                             <FontAwesomeIcon icon={faAmbulance} className="me-2" /> URGENCE
                         </button>

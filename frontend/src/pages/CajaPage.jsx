@@ -13,7 +13,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 import api from '../services/api';
 import ConfirmModal from '../component/ConfirmModal';
 
@@ -157,8 +157,10 @@ const CajaPage = ({ user }) => {
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7.5);
-        doc.text("San Miguel de Tucumán", cx, 17, { align: "center" });
-        doc.text("───────────────────────────", cx, 23, { align: "center" });
+        doc.text("San Miguel de Tucuman", cx, 17, { align: "center" });
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(0.3);
+        doc.line(8, 22, W - 8, 22);
 
         // ── INFO ─────────────────────────────────────────────
         doc.setTextColor(60, 60, 60);
@@ -248,9 +250,9 @@ const CajaPage = ({ user }) => {
         doc.setTextColor(160, 160, 160);
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7.5);
-        doc.text("¡Gracias por elegirnos!", cx, y, { align: "center" });
+        doc.text("Gracias por elegirnos!", cx, y, { align: "center" });
         y += 5;
-        doc.text("Malfi Veterinaria — Tu mascota, nuestra pasión", cx, y, { align: "center" });
+        doc.text("Malfi Veterinaria - Tu mascota, nuestra pasion", cx, y, { align: "center" });
 
         doc.save(`Ticket_Malfi_${Date.now()}.pdf`);
     };
@@ -280,22 +282,14 @@ const CajaPage = ({ user }) => {
     };
 
     const exportarPDF = () => {
-        const doc = new jsPDF({ orientation: 'landscape' });
-        doc.text("Reporte de Caja - Malfi Veterinaria", 14, 15);
-        autoTable(doc, {
-            startY: 20,
-            head: [['Fecha', 'Concepto', 'Cliente', 'Empleado', 'Medio', 'Monto']],
-            body: ventas.map(v => [
-                v.fecha_formateada,
-                v.descripcion.substring(0, 40),
-                v.nombre_cliente || '—',
-                v.empleado_nombre || '—',
-                v.metodo_pago,
-                `$${v.monto}`
-            ]),
-            headStyles: { fillColor: [102, 51, 153] }
+        exportarPDFEstilizado({
+            titulo: 'Reporte de Caja - Malfi Veterinaria',
+            columnas: ['Fecha', 'Concepto', 'Cliente', 'Empleado', 'Medio', 'Monto'],
+            filas: ventas.map(v => [v.fecha_formateada, v.descripcion.substring(0, 40), v.nombre_cliente || '-', v.empleado_nombre || '-', v.metodo_pago, `$${v.monto}`]),
+            filename: 'Reporte_Caja_Malfi.pdf',
+            headerColor: [102, 51, 153],
+            accentColor: [155, 89, 182]
         });
-        doc.save("Reporte_Caja_Malfi.pdf");
     };
 
     const handleConfirmarEliminarPermanente = async () => {

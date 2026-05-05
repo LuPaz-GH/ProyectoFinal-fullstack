@@ -10,7 +10,7 @@ import ConfirmModal from '../component/ConfirmModal';
 import api from '../services/api';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 
 const ClientesPage = () => {
   const [duenos, setDuenos] = useState([]);
@@ -205,18 +205,14 @@ const ClientesPage = () => {
   };
 
   const exportarPDFGeneral = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("Listado de Clientes - Malfi Veterinaria", 14, 20);
-    const columns = ["Dueño", "DNI", "Teléfono", "Mascotas"];
-    const rows = filtrados.map(c => [
-      c.nombre,
-      c.dni,
-      c.telefono,
-      c.mascotasAsociadas.map(m => m.nombre).join(', ')
-    ]);
-    autoTable(doc, { head: [columns], body: rows, startY: 30 });
-    doc.save("Clientes_Malfi.pdf");
+    exportarPDFEstilizado({
+      titulo: 'Listado de Clientes - Malfi Veterinaria',
+      columnas: ['Dueno', 'DNI', 'Telefono', 'Mascotas'],
+      filas: filtrados.map(c => [c.nombre, c.dni, c.telefono, c.mascotasAsociadas.map(m => m.nombre).join(', ')]),
+      filename: 'Clientes_Malfi.pdf',
+      headerColor: [26, 111, 196],
+      accentColor: [52, 152, 219]
+    });
   };
 
   const exportarComprobanteCliente = (cliente) => {

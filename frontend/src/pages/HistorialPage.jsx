@@ -9,7 +9,7 @@ import {
 import ConfirmModal from '../component/ConfirmModal';
 import api from '../services/api';
 
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -107,22 +107,17 @@ const HistorialPage = ({ user }) => {
     };
 
     const exportarPDFGeneral = () => {
-        const doc = new jsPDF();
-        const titulo = mascotaSeleccionada ? `Historial de ${mascotaSeleccionada.nombre}` : "Listado de Mascotas - Malfi";
-        doc.text(titulo, 105, 20, { align: 'center' });
-        
-        const headers = mascotaSeleccionada ? [['Fecha', 'Diagnóstico', 'Tratamiento', 'Peso']] : [['Nombre', 'Dueño']];
-        const body = mascotaSeleccionada 
-            ? historial.map(h => [h.fecha_formateada, h.diagnostico, h.tratamiento, formatearPeso(h.peso)])
-            : mascotas.map(m => [m.nombre, m.dueno_nombre]);
-
-        autoTable(doc, {
-            startY: 30,
-            head: headers,
-            body: body,
-            headStyles: { fillColor: [0, 123, 255] }
+        const titulo = mascotaSeleccionada ? `Historial de ${mascotaSeleccionada.nombre}` : 'Listado de Mascotas - Malfi';
+        exportarPDFEstilizado({
+            titulo,
+            columnas: mascotaSeleccionada ? ['Fecha', 'Diagnostico', 'Tratamiento', 'Peso'] : ['Nombre', 'Dueno'],
+            filas: mascotaSeleccionada
+                ? historial.map(h => [h.fecha_formateada, h.diagnostico, h.tratamiento, formatearPeso(h.peso)])
+                : mascotas.map(m => [m.nombre, m.dueno_nombre]),
+            filename: `${titulo.replace(/ /g, '_')}.pdf`,
+            headerColor: [41, 128, 185],
+            accentColor: [52, 152, 219]
         });
-        doc.save(`${titulo.replace(/ /g, "_")}.pdf`);
     };
 
     const exportarExcelGeneral = async () => {

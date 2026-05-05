@@ -7,7 +7,7 @@ import {
     faClipboardList, faUser, faPhone, faCalendarDay, faCircleExclamation,
     faChevronLeft, faChevronRight, faAnglesLeft, faAnglesRight, faHistory, faTrashRestore, faToggleOff, faEyeSlash
 } from '@fortawesome/free-solid-svg-icons';
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
@@ -245,14 +245,14 @@ const EsteticaPage = () => {
     };
 
     const exportarPDFGeneral = () => {
-        const doc = new jsPDF();
-        doc.text("Agenda de Peluquería Malfi", 14, 15);
-        autoTable(doc, {
-            head: [["Fecha", "Hora", "Mascota", "Dueño", "Servicio"]],
-            body: obtenerTurnosFiltradosYOrdenados().map(s => [s.fecha, s.hora, s.mascota, s.dueno, s.servicio]),
-            startY: 20
+        exportarPDFEstilizado({
+            titulo: 'Agenda de Peluqueria - Malfi Veterinaria',
+            columnas: ['Fecha', 'Hora', 'Mascota', 'Dueno', 'Servicio'],
+            filas: obtenerTurnosFiltradosYOrdenados().map(s => [s.fecha, s.hora, s.mascota, s.dueno, s.servicio]),
+            filename: 'Agenda_Peluqueria_Malfi.pdf',
+            headerColor: [232, 67, 147],
+            accentColor: [253, 121, 168]
         });
-        doc.save("Agenda_Peluqueria.pdf");
     };
 
     const handleGuardarTurno = async (e) => {

@@ -24,6 +24,7 @@ import {
   faEye
 } from '@fortawesome/free-solid-svg-icons';
 import ConfirmModal from '../component/ConfirmModal';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 
 const GestionEmpleados = () => {
   const [empleados, setEmpleados] = useState([]);
@@ -282,6 +283,33 @@ const GestionEmpleados = () => {
     setPaginaActual(1);
   }, [busqueda]);
 
+  const exportarPDF = () => {
+    exportarPDFEstilizado({
+      titulo: 'Gestion de Empleados - Malfi Veterinaria',
+      columnas: ['Nombre', 'Usuario', 'Email', 'Rol'],
+      filas: empleadosFiltrados.map(e => [e.nombre, e.usuario, e.email || '-', e.rol]),
+      filename: 'Empleados_Malfi.pdf',
+      orientation: 'portrait',
+      headerColor: [44, 62, 80],
+      accentColor: [155, 89, 182]
+    });
+  };
+
+  const exportarExcel = async () => {
+    await exportarExcelEstilizado({
+      data: empleadosFiltrados.map(e => ({ nombre: e.nombre, usuario: e.usuario, email: e.email || '-', rol: e.rol })),
+      columns: [
+        { header: 'Nombre', key: 'nombre', width: 25 },
+        { header: 'Usuario', key: 'usuario', width: 22 },
+        { header: 'Email', key: 'email', width: 30 },
+        { header: 'Rol', key: 'rol', width: 15 },
+      ],
+      filename: 'Empleados_Malfi.xlsx',
+      sheetName: 'Empleados',
+      headerColor: '2C3E50'
+    });
+  };
+
   if (loading) return <div className="text-center py-5 fw-bold text-white">Cargando...</div>;
 
   return (
@@ -369,8 +397,8 @@ const GestionEmpleados = () => {
                 <FontAwesomeIcon icon={faTrash} className="me-2" /> Papelera
               </button>
               
-              <button className="btn btn-danger rounded-circle shadow-sm" style={{width:'45px', height:'45px'}}><FontAwesomeIcon icon={faFilePdf}/></button>
-              <button className="btn btn-success rounded-circle shadow-sm" style={{width:'45px', height:'45px'}}><FontAwesomeIcon icon={faFileExcel}/></button>
+              <button className="btn btn-danger rounded-circle shadow-sm" style={{width:'45px', height:'45px'}} onClick={exportarPDF} title="Exportar PDF"><FontAwesomeIcon icon={faFilePdf}/></button>
+              <button className="btn btn-success rounded-circle shadow-sm" style={{width:'45px', height:'45px'}} onClick={exportarExcel} title="Exportar Excel"><FontAwesomeIcon icon={faFileExcel}/></button>
               
               <div className="input-group shadow-sm rounded-pill overflow-hidden bg-white ms-2" style={{width: '300px'}}>
                 <span className="input-group-text bg-white border-0 ps-3"><FontAwesomeIcon icon={faSearch} className="text-muted" /></span>

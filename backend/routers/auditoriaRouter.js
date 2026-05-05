@@ -6,18 +6,19 @@ const authMiddleware = require('../middleware/auth');
 // 1. Obtener historial con filtros y paginación
 router.get('/historial', async (req, res) => {
     try {
-        const { 
-            pagina = 1, 
-            limite = 25, 
-            buscar, 
-            categoria,     
-            accion, 
-            fechaDesde, 
-            fechaHasta, 
-            orden = 'fecha', 
+        const {
+            pagina = 1,
+            limite = 25,
+            buscar,
+            categoria,
+            accion,
+            fechaDesde,
+            fechaHasta,
+            orden = 'fecha',
             direccion = 'DESC',
             mostrarEliminados = 'false',
-            modulo        
+            modulo,
+            responsableFiltro
         } = req.query;
 
         const pageNum = parseInt(pagina) || 1;
@@ -46,6 +47,14 @@ router.get('/historial', async (req, res) => {
             countQuery += searchSql;
             params.push(searchVal, searchVal, searchVal, searchVal);
             countParams.push(searchVal, searchVal, searchVal, searchVal);
+        }
+
+        if (responsableFiltro && responsableFiltro.trim() !== '') {
+            const rVal = `%${responsableFiltro.trim()}%`;
+            query += ` AND responsable LIKE ?`;
+            countQuery += ` AND responsable LIKE ?`;
+            params.push(rVal);
+            countParams.push(rVal);
         }
 
         if (accion && accion !== '') {

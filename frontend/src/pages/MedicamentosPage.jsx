@@ -7,7 +7,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import ConfirmModal from '../component/ConfirmModal';
 import ProductoModal from '../component/ProductoModal';
-import { exportarExcelEstilizado } from '../utils/exportExcel';
+import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
@@ -149,19 +149,14 @@ const MedicamentosPage = () => {
     };
 
     const exportarPDF = () => {
-        const doc = new jsPDF();
-        doc.text("Farmacia - Malfi Veterinaria", 14, 20);
-        autoTable(doc, {
-            startY: 30,
-            head: [['Nombre', 'Precio', 'Stock', 'Vencimiento']],
-            body: medicamentos.map(m => [
-                m.nombre,
-                `$${m.precio_venta}`,
-                m.stock,
-                m.vencimiento_med ? new Date(m.vencimiento_med).toLocaleDateString() : 'N/A'
-            ])
+        exportarPDFEstilizado({
+            titulo: 'Farmacia - Malfi Veterinaria',
+            columnas: ['Nombre', 'Precio', 'Stock', 'Vencimiento'],
+            filas: medicamentos.map(m => [m.nombre, `$${m.precio_venta}`, m.stock, m.vencimiento_med ? new Date(m.vencimiento_med).toLocaleDateString() : 'N/A']),
+            filename: 'Stock_Medicamentos_Malfi.pdf',
+            headerColor: [142, 68, 173],
+            accentColor: [155, 89, 182]
         });
-        doc.save("Stock_Medicamentos_Malfi.pdf");
     };
 
     return (
