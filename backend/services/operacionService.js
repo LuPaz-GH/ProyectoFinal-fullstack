@@ -603,7 +603,8 @@ const operacionService = {
     // 6. FUNCIÓN ATENDER CONSULTA
 
     atenderConsulta: async (id, datos) => {
-        const { diagnostico, tratamiento, peso, veterinario_id, mascota_id } = datos;
+        const { diagnostico, tratamiento, veterinario_id, mascota_id } = datos;
+        const peso = datos.peso ? parseFloat(String(datos.peso).replace(/[^0-9.]/g, '')) || null : null;
         const connection = await pool.getConnection();
         try {
             await connection.beginTransaction();
