@@ -909,25 +909,43 @@ const TurnosPage = ({ user }) => {
                             {/* Mascota */}
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">Mascota *</label>
-                                <input
-                                    type="text"
-                                    className="form-control rounded-pill mb-2"
-                                    placeholder="Buscar mascota o dueño..."
-                                    value={busquedaMascota}
-                                    onChange={(e) => setBusquedaMascota(e.target.value)}
-                                />
-                                <select className="form-select rounded-pill" value={nuevoTurno.mascota_id} onChange={(e) => {
-                                    const m = mascotas.find(mas => mas.id == e.target.value);
-                                    if(m) setNuevoTurno({...nuevoTurno, mascota_id: e.target.value, dueno_id: m.dueno_id});
-                                }} required>
-                                    <option value="">Seleccioná...</option>
-                                    {mascotas
-                                        .filter(m => {
-                                            const q = busquedaMascota.toLowerCase();
-                                            return m.nombre.toLowerCase().includes(q) || (m.dueno_nombre && m.dueno_nombre.toLowerCase().includes(q));
-                                        })
-                                        .map(m => (<option key={m.id} value={m.id}>{m.nombre} (Dueño: {m.dueno_nombre})</option>))}
-                                </select>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type="text"
+                                        className="form-control rounded-pill"
+                                        placeholder="Buscar mascota o dueño..."
+                                        value={busquedaMascota}
+                                        autoComplete="off"
+                                        onChange={(e) => { setBusquedaMascota(e.target.value); setNuevoTurno({...nuevoTurno, mascota_id: '', dueno_id: ''}); }}
+                                    />
+                                    {busquedaMascota && (
+                                        <div style={{ position: 'absolute', zIndex: 9999, width: '100%', maxHeight: '200px', overflowY: 'auto', backgroundColor: 'white', border: '1px solid #dee2e6', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', top: '110%' }}>
+                                            {mascotas.filter(m =>
+                                                m.nombre.toLowerCase().includes(busquedaMascota.toLowerCase()) ||
+                                                (m.dueno_nombre && m.dueno_nombre.toLowerCase().includes(busquedaMascota.toLowerCase()))
+                                            ).length === 0 ? (
+                                                <div style={{ padding: '10px 12px', color: '#888' }}>No se encontraron resultados</div>
+                                            ) : mascotas.filter(m =>
+                                                m.nombre.toLowerCase().includes(busquedaMascota.toLowerCase()) ||
+                                                (m.dueno_nombre && m.dueno_nombre.toLowerCase().includes(busquedaMascota.toLowerCase()))
+                                            ).map(m => (
+                                                <div key={m.id}
+                                                    style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0' }}
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        setNuevoTurno({...nuevoTurno, mascota_id: m.id, dueno_id: m.dueno_id});
+                                                        setBusquedaMascota(`${m.nombre} (Dueño: ${m.dueno_nombre})`);
+                                                    }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f4ff'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                                                >
+                                                    {m.nombre} <span style={{ color: '#888', fontSize: '0.85em' }}>(Dueño: {m.dueno_nombre})</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                {nuevoTurno.mascota_id && <small className="text-success mt-1 d-block">✓ Mascota seleccionada</small>}
                             </div>
                             {/* Fecha */}
                             <div className="mb-3">
