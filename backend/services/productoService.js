@@ -110,15 +110,16 @@ const productoService = {
                 [nombre, precio_venta, stock, usuarioId, id]
             );
             
+            const fechaFormateada = info ? info.split('T')[0] : null;
             if (categoria === 'alimentos') {
                 await connection.query(
                     `INSERT INTO alimentos (producto_id, fecha_vencimiento) VALUES (?, ?) ON DUPLICATE KEY UPDATE fecha_vencimiento = VALUES(fecha_vencimiento)`,
-                    [id, info || null]
+                    [id, fechaFormateada]
                 );
             } else if (categoria === 'medicamentos') {
                 await connection.query(
                     `INSERT INTO medicamentos (producto_id, fecha_vencimiento) VALUES (?, ?) ON DUPLICATE KEY UPDATE fecha_vencimiento = VALUES(fecha_vencimiento)`,
-                    [id, info || null]
+                    [id, fechaFormateada]
                 );
             }
             
