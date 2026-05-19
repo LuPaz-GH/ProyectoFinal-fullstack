@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-const API_BASE = import.meta.env.VITE_API_URL || '${API_BASE}';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
@@ -67,7 +67,7 @@ const GestionEmpleados = () => {
   const fetchNotificaciones = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('${API_BASE}/api/auditoria/credenciales-empleados', {
+      const res = await fetch(`${API_BASE}/api/auditoria/credenciales-empleados`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -114,7 +114,7 @@ const GestionEmpleados = () => {
 
   const fetchEmpleados = async () => {
     try {
-      const res = await fetch('${API_BASE}/api/empleados');
+      const res = await fetch(`${API_BASE}/api/empleados`);
       if (!res.ok) throw new Error('Error al cargar empleados');
       const data = await res.json();
       setEmpleados(data.filter(emp => emp.activo === 1));
@@ -128,7 +128,7 @@ const GestionEmpleados = () => {
 
   const fetchEliminados = async () => {
     try {
-      const res = await fetch('${API_BASE}/api/empleados/papelera');
+      const res = await fetch(`${API_BASE}/api/empleados/papelera`);
       if (!res.ok) throw new Error('Error al cargar papelera');
       const data = await res.json();
       setEmpleadosEliminados(data);
@@ -171,7 +171,7 @@ const GestionEmpleados = () => {
       const token = localStorage.getItem('token');
       const url = empleadoEdit 
         ? `${API_BASE}/api/empleados/${empleadoEdit.id}` 
-        : '${API_BASE}/api/empleados';
+        : `${API_BASE}/api/empleados`;
       const res = await fetch(url, {
         method: empleadoEdit ? 'PUT' : 'POST',
         headers: { 

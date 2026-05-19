@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-const API_BASE = import.meta.env.VITE_API_URL || '${API_BASE}';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock, faCheckCircle, faPaw, faArrowLeft, faUser } from '@fortawesome/free-solid-svg-icons';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-const API_BASE = import.meta.env.VITE_API_URL || '${API_BASE}';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
@@ -37,7 +37,7 @@ const DueñosPage = () => {
   const cargarDuenos = async () => {
     setLoading(true);
     try {
-      const response = await fetch('${API_BASE}/api/duenos');
+      const response = await fetch(`${API_BASE}/api/duenos`);
       if (!response.ok) throw new Error(`Error ${response.status}`);
       const data = await response.json();
       setDuenos(Array.isArray(data) ? data : []);
