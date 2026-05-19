@@ -35,7 +35,8 @@ const CajaPage = ({ user }) => {
     const [mostrarClientes, setMostrarClientes] = useState(false);
 
     const [filtroBusqueda, setFiltroBusqueda] = useState('');
-    const [filtroFecha, setFiltroFecha] = useState(new Date().toISOString().split('T')[0]);
+    const [filtroFechaDesde, setFiltroFechaDesde] = useState(new Date().toISOString().split('T')[0]);
+    const [filtroFechaHasta, setFiltroFechaHasta] = useState(new Date().toISOString().split('T')[0]);
 
     const [busquedaProd, setBusquedaProd] = useState('');
     const [sugerenciasProd, setSugerenciasProd] = useState([]);
@@ -83,12 +84,13 @@ const CajaPage = ({ user }) => {
     useEffect(() => {
         const timeout = setTimeout(() => { cargarCaja(); }, filtroBusqueda ? 400 : 0);
         return () => clearTimeout(timeout);
-    }, [filtroBusqueda, filtroFecha]);
+    }, [filtroBusqueda, filtroFechaDesde, filtroFechaHasta]);
 
     const cargarCaja = async () => {
         try {
             const params = new URLSearchParams();
-            if (filtroFecha) params.set('fecha', filtroFecha);
+            if (filtroFechaDesde) params.set('fechaDesde', filtroFechaDesde);
+            if (filtroFechaHasta) params.set('fechaHasta', filtroFechaHasta);
             if (filtroBusqueda.trim()) params.set('q', filtroBusqueda.trim());
             const res = await api.get(`/caja?${params.toString()}`);
             setVentas(Array.isArray(res.data) ? res.data : []);
@@ -263,7 +265,7 @@ const CajaPage = ({ user }) => {
                 fecha: v.fecha_formateada,
                 concepto: v.descripcion.replace(/\n/g, ' | '),
                 cliente: v.nombre_cliente || '',
-                empleado: v.empleado_nombre || '',
+                empleado: (v.empleado_nombre || '').replace(/_/g, ' ').toUpperCase(),
                 medio: v.metodo_pago.toUpperCase(),
                 monto: Number(v.monto)
             })),
@@ -277,7 +279,7 @@ const CajaPage = ({ user }) => {
             ],
             filename: `Reporte_Caja_Malfi_${new Date().toLocaleDateString().replace(/\//g, '-')}.xlsx`,
             sheetName: 'Ventas',
-            headerColor: '1E8449'
+            headerColor: '6B21A8'
         });
     };
 
@@ -285,10 +287,10 @@ const CajaPage = ({ user }) => {
         exportarPDFEstilizado({
             titulo: 'Reporte de Caja - Malfi Veterinaria',
             columnas: ['Fecha', 'Concepto', 'Cliente', 'Empleado', 'Medio', 'Monto'],
-            filas: ventas.map(v => [v.fecha_formateada, v.descripcion.substring(0, 40), v.nombre_cliente || '-', v.empleado_nombre || '-', v.metodo_pago, `$${v.monto}`]),
+            filas: ventas.map(v => [v.fecha_formateada, v.descripcion.substring(0, 40), v.nombre_cliente || '-', (v.empleado_nombre || '-').replace(/_/g, ' ').toUpperCase(), v.metodo_pago.toUpperCase(), `$${v.monto}`]),
             filename: 'Reporte_Caja_Malfi.pdf',
-            headerColor: [102, 51, 153],
-            accentColor: [155, 89, 182]
+            headerColor: [107, 33, 168],
+            accentColor: [134, 192, 70]
         });
     };
 
@@ -482,8 +484,8 @@ const CajaPage = ({ user }) => {
 
                 {/* BUSCADOR */}
                 <div className="card border-0 shadow-sm rounded-4 p-3 mb-3" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)' }}>
-                    <div className="row g-2 align-items-center">
-                        <div className="col-md-5">
+                    <div className="row g-2 align-items-end">
+                        <div className="col-md-4">
                             <div className="input-group rounded-pill overflow-hidden bg-white border shadow-sm">
                                 <span className="input-group-text bg-white border-0 ps-3"><FontAwesomeIcon icon={faSearch} className="text-muted" /></span>
                                 <input type="text" className="form-control border-0 py-2 text-dark"
@@ -497,33 +499,40 @@ const CajaPage = ({ user }) => {
                                 )}
                             </div>
                         </div>
-                        <div className="col-md-3">
+                        <div className="col-md-2">
+                            <label className="form-label small fw-bold text-muted mb-1 ps-1">Desde</label>
                             <input type="date" className="form-control rounded-pill border py-2"
-                                value={filtroFecha}
-                                onChange={e => setFiltroFecha(e.target.value)} />
+                                value={filtroFechaDesde}
+                                onChange={e => setFiltroFechaDesde(e.target.value)} />
+                        </div>
+                        <div className="col-md-2">
+                            <label className="form-label small fw-bold text-muted mb-1 ps-1">Hasta</label>
+                            <input type="date" className="form-control rounded-pill border py-2"
+                                value={filtroFechaHasta}
+                                onChange={e => setFiltroFechaHasta(e.target.value)} />
                         </div>
                         <div className="col-md-4 d-flex gap-2">
                             <button className="btn btn-outline-secondary rounded-pill px-3 py-2 small fw-bold"
-                                onClick={() => { setFiltroFecha(''); setFiltroBusqueda(''); }}>
+                                onClick={() => { setFiltroFechaDesde(''); setFiltroFechaHasta(''); setFiltroBusqueda(''); }}>
                                 Ver historial completo
                             </button>
                             <button className="btn btn-outline-primary rounded-pill px-3 py-2 small fw-bold"
-                                onClick={() => { setFiltroFecha(new Date().toISOString().split('T')[0]); setFiltroBusqueda(''); }}>
+                                onClick={() => { const hoy = new Date().toISOString().split('T')[0]; setFiltroFechaDesde(hoy); setFiltroFechaHasta(hoy); setFiltroBusqueda(''); }}>
                                 Hoy
                             </button>
                         </div>
                     </div>
                     <div className="mt-2 ps-1">
                         <small className="text-muted fst-italic">
-                            {!filtroFecha && !filtroBusqueda
+                            {!filtroFechaDesde && !filtroFechaHasta && !filtroBusqueda
                                 ? '📋 Mostrando todo el historial'
-                                : !filtroFecha
+                                : !filtroFechaDesde && !filtroFechaHasta
                                 ? `🔍 Buscando "${filtroBusqueda}" en todo el historial`
-                                : filtroBusqueda
-                                ? `🔍 Buscando "${filtroBusqueda}" — ${filtroFecha === new Date().toISOString().split('T')[0] ? 'hoy' : filtroFecha}`
-                                : filtroFecha === new Date().toISOString().split('T')[0]
-                                ? '📅 Mostrando registros de hoy'
-                                : `📅 Mostrando registros del ${filtroFecha}`}
+                                : filtroFechaDesde === filtroFechaHasta && filtroFechaDesde === new Date().toISOString().split('T')[0]
+                                ? `📅 Mostrando registros de hoy${filtroBusqueda ? ` — "${filtroBusqueda}"` : ''}`
+                                : filtroFechaDesde === filtroFechaHasta
+                                ? `📅 Mostrando registros del ${filtroFechaDesde}${filtroBusqueda ? ` — "${filtroBusqueda}"` : ''}`
+                                : `📅 Del ${filtroFechaDesde || '...'} al ${filtroFechaHasta || '...'}${filtroBusqueda ? ` — "${filtroBusqueda}"` : ''}`}
                         </small>
                     </div>
                 </div>
@@ -540,7 +549,7 @@ const CajaPage = ({ user }) => {
                                         <td className="ps-4 small text-muted">{v.fecha_formateada}</td>
                                         <td className="fw-bold small">{v.descripcion.substring(0, 40)}...</td>
                                         <td className="small">{v.nombre_cliente || <span className="text-muted">—</span>}</td>
-                                        <td className="small">{v.empleado_nombre || <span className="text-muted">—</span>}</td>
+                                        <td className="small fw-bold text-dark" style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>{v.empleado_nombre ? v.empleado_nombre.replace(/_/g, ' ') : <span className="text-muted fw-normal">—</span>}</td>
                                         <td><span className="badge bg-light text-dark border">{v.metodo_pago.toUpperCase()}</span></td>
                                         <td className="text-end fw-bold text-success">$ {Number(v.monto).toLocaleString('es-AR')}</td>
                                         <td className="text-center" onClick={(e) => e.stopPropagation()}>

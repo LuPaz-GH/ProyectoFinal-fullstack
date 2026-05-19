@@ -459,7 +459,7 @@ const operacionService = {
     // 4. CAJA
 
     getMovimientosCaja: async (filters = {}) => {
-        const { fecha, q } = filters;
+        const { fecha, fechaDesde, fechaHasta, q } = filters;
         let sql = `
             SELECT c.*, DATE_FORMAT(c.fecha, '%d/%m/%Y %H:%i') as fecha_formateada,
                    e.nombre as empleado_nombre
@@ -472,14 +472,21 @@ const operacionService = {
         if (q && q.trim()) {
             sql += ` AND (c.descripcion LIKE ? OR c.nombre_cliente LIKE ?)`;
             params.push(`%${q.trim()}%`, `%${q.trim()}%`);
-            if (fecha) {
-                sql += ` AND DATE(c.fecha) = ?`;
-                params.push(fecha);
-            }
-        } else if (fecha) {
-            sql += ` AND DATE(c.fecha) = ?`;
-            params.push(fecha);
-        } else {
+        }
+
+        const desde = fechaDesde || fecha || null;
+        const hasta = fechaHasta || fecha || null;
+
+        if (desde && hasta) {
+            sql += ` AND DATE(c.fecha) BETWEEN ? AND ?`;
+            params.push(desde, hasta);
+        } else if (desde) {
+            sql += ` AND DATE(c.fecha) >= ?`;
+            params.push(desde);
+        } else if (hasta) {
+            sql += ` AND DATE(c.fecha) <= ?`;
+            params.push(hasta);
+        } else if (!q || !q.trim()) {
             sql += ` AND DATE(c.fecha) = CURDATE()`;
         }
 

@@ -67,19 +67,19 @@ export async function exportarExcelEstilizado({
     const isEven = index % 2 === 0;
     row.height = 22;
     row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-      // Fila par → lavanda suave | fila impar → celeste-violáceo
+      // Fila par → rosa claro | fila impar → lavanda suave
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: isEven ? 'FFEFE6FA' : 'FFE6EEFA' }
+        fgColor: { argb: isEven ? 'FFFCE4EC' : 'FFF3E8FF' }
       };
-      cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF2C1654' } };
+      cell.font = { size: 10, name: 'Calibri', color: { argb: 'FF000000' } };
       cell.alignment = { vertical: 'middle', wrapText: false };
       cell.border = {
-        top:    { style: 'thin',   color: { argb: 'FFCDB8E8' } },
-        left:   { style: 'medium', color: { argb: 'FFB39DDB' } },
-        bottom: { style: 'thin',   color: { argb: 'FFCDB8E8' } },
-        right:  { style: 'medium', color: { argb: 'FFB39DDB' } }
+        top:    { style: 'thin',   color: { argb: 'FFF8BBD0' } },
+        left:   { style: 'medium', color: { argb: 'FFD8B4FE' } },
+        bottom: { style: 'thin',   color: { argb: 'FFF8BBD0' } },
+        right:  { style: 'medium', color: { argb: 'FFD8B4FE' } }
       };
       // Alinear números a la derecha
       if (typeof (item[columns[colNumber - 1]?.key]) === 'number') {
@@ -89,7 +89,7 @@ export async function exportarExcelEstilizado({
 
     if (index === data.length - 1) {
       row.eachCell({ includeEmpty: true }, cell => {
-        cell.border = { ...cell.border, bottom: { style: 'medium', color: { argb: 'FFB39DDB' } } };
+        cell.border = { ...cell.border, bottom: { style: 'medium', color: { argb: 'FFD8B4FE' } } };
       });
     }
   });
@@ -194,13 +194,13 @@ export function exportarPDFEstilizado({
     bodyStyles: {
       fontSize: 8.5,
       cellPadding: { top: 3, bottom: 3, left: 4, right: 4 },
-      textColor: [44, 22, 84],
-      lineColor: [179, 157, 219],
+      textColor: [0, 0, 0],
+      lineColor: [216, 180, 254],
       lineWidth: 0.25,
-      fillColor: [230, 238, 250]   // celeste-violáceo — filas impares
+      fillColor: [243, 232, 255]   // lavanda suave — filas impares
     },
     alternateRowStyles: {
-      fillColor: [239, 230, 250]   // lavanda — filas pares
+      fillColor: [252, 228, 236]   // rosa claro — filas pares
     },
     tableLineColor: headerColor,
     tableLineWidth: 0.5,

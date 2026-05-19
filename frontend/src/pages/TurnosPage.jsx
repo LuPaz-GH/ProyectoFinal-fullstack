@@ -24,6 +24,8 @@ const TurnosPage = ({ user }) => {
     const [showPapelera, setShowPapelera] = useState(false);
     const [filtroFecha, setFiltroFecha] = useState('hoy');
     const [fechaPersonalizada, setFechaPersonalizada] = useState('');
+    const [fechaDesde, setFechaDesde] = useState('');
+    const [fechaHasta, setFechaHasta] = useState('');
     // ESTADOS DE PAGINACIÓN
     const [pagina, setPagina] = useState(1);
     const [totalPaginas, setTotalPaginas] = useState(1);
@@ -233,6 +235,11 @@ const TurnosPage = ({ user }) => {
             setLoading(false);
             return;
         }
+        if (filtroFecha === 'rango' && !fechaDesde && !fechaHasta) {
+            setTurnos([]);
+            setLoading(false);
+            return;
+        }
         setLoading(true);
         try {
             const hoy = new Date();
@@ -250,6 +257,9 @@ const TurnosPage = ({ user }) => {
                 query += `&fechaDesde=${lunes.toISOString().split('T')[0]}&fechaHasta=${domingo.toISOString().split('T')[0]}`;
             } else if (filtroFecha === 'personalizado' && fechaPersonalizada) {
                 query += `&fecha=${fechaPersonalizada}`;
+            } else if (filtroFecha === 'rango') {
+                if (fechaDesde) query += `&fechaDesde=${fechaDesde}`;
+                if (fechaHasta) query += `&fechaHasta=${fechaHasta}`;
             }
             const ts = Date.now();
             const [resT, resM] = await Promise.all([
@@ -297,7 +307,7 @@ const TurnosPage = ({ user }) => {
     };
     useEffect(() => {
         cargarDatos();
-    }, [pagina, filtroFecha, fechaPersonalizada]);
+    }, [pagina, filtroFecha, fechaPersonalizada, fechaDesde, fechaHasta]);
     useEffect(() => {
         if (showPapelera) cargarPapelera();
     }, [showPapelera]);
@@ -305,6 +315,7 @@ const TurnosPage = ({ user }) => {
         setFiltroFecha(nuevoValor);
         setPagina(1);
         if (nuevoValor !== 'personalizado') setFechaPersonalizada('');
+        if (nuevoValor !== 'rango') { setFechaDesde(''); setFechaHasta(''); }
     };
     const obtenerTurnosProcesados = () => {
         return turnos.filter(t => {
@@ -716,9 +727,9 @@ const TurnosPage = ({ user }) => {
                         <option value="hoy">Hoy</option>
                         <option value="semana">Esta semana</option>
                         <option value="personalizado">Personalizado</option>
+                        <option value="rango">Rango de fechas</option>
                     </select>
 
-                    {/* ✅ CALENDARIO QUE APARECE SOLO EN PERSONALIZADO */}
                     {filtroFecha === 'personalizado' && (
                         <input
                             type="date"
@@ -727,6 +738,28 @@ const TurnosPage = ({ user }) => {
                             onChange={(e) => setFechaPersonalizada(e.target.value)}
                             style={{ maxWidth: '200px' }}
                         />
+                    )}
+
+                    {filtroFecha === 'rango' && (
+                        <>
+                            <input
+                                type="date"
+                                className="form-control rounded-pill shadow-sm"
+                                value={fechaDesde}
+                                onChange={(e) => { setFechaDesde(e.target.value); setPagina(1); }}
+                                style={{ maxWidth: '180px' }}
+                                title="Desde"
+                            />
+                            <span className="text-white fw-bold px-1">→</span>
+                            <input
+                                type="date"
+                                className="form-control rounded-pill shadow-sm"
+                                value={fechaHasta}
+                                onChange={(e) => { setFechaHasta(e.target.value); setPagina(1); }}
+                                style={{ maxWidth: '180px' }}
+                                title="Hasta"
+                            />
+                        </>
                     )}
 
                     <button

@@ -25,7 +25,8 @@ const AuditoriaPage = ({ user }) => {
   const [orden, setOrden] = useState({ campo: 'fecha', direccion: 'DESC' });
   const [filtros, setFiltros] = useState({
     buscar: '',
-    fechaEspecifica: new Date().toISOString().split('T')[0],
+    fechaDesde: new Date().toISOString().split('T')[0],
+    fechaHasta: new Date().toISOString().split('T')[0],
     filtroEmpleado: '',
     categoria: '',
     accion: '',
@@ -63,8 +64,8 @@ const AuditoriaPage = ({ user }) => {
         buscar: filtros.buscar || undefined,
         modulo: filtros.categoria || undefined,
         accion: filtros.accion || undefined,
-        fechaDesde: filtros.fechaEspecifica || undefined,
-        fechaHasta: filtros.fechaEspecifica || undefined,
+        fechaDesde: filtros.fechaDesde || undefined,
+        fechaHasta: filtros.fechaHasta || undefined,
         responsableFiltro: filtros.filtroEmpleado || undefined,
         orden: orden.campo,
         direccion: orden.direccion,
@@ -206,9 +207,11 @@ const AuditoriaPage = ({ user }) => {
   };
   
   const limpiarFiltros = () => {
+    const hoy = new Date().toISOString().split('T')[0];
     setFiltros({
       buscar: '',
-      fechaEspecifica: new Date().toISOString().split('T')[0],
+      fechaDesde: hoy,
+      fechaHasta: hoy,
       filtroEmpleado: '',
       categoria: '',
       accion: '',
@@ -220,38 +223,22 @@ const AuditoriaPage = ({ user }) => {
   const exportarExcel = async () => {
     await exportarExcelEstilizado({
       data: movimientos.map(m => ({
-        id: m.id,
-        fecha: new Date(m.fecha).toLocaleString('es-AR'),
-        producto: m.producto || '',
-        mascota: m.mascota || '',
-        categoria: m.categoria || '',
-        servicio: m.servicio || '',
-        accion: m.accion || '',
-        responsable: m.responsable || '',
-        modulo: m.modulo || '',
-        id_referencia: m.id_referencia || '',
-        precio_venta: m.precio_venta || '',
-        stock: m.stock || '',
-        eliminado: m.eliminado ? 'Sí' : 'No',
+        modulo: (m.modulo || '').toUpperCase(),
+        accion: (m.accion || '').toUpperCase(),
+        elemento: getElementoAfectado(m),
+        responsable: (m.responsable || '').replace(/_/g, ' ').toUpperCase(),
+        fecha: new Date(m.fecha).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
       })),
       columns: [
-        { header: 'ID', key: 'id', width: 8 },
-        { header: 'Fecha', key: 'fecha', width: 22 },
-        { header: 'Producto / Elemento', key: 'producto', width: 28 },
-        { header: 'Mascota', key: 'mascota', width: 16 },
-        { header: 'Categoría', key: 'categoria', width: 16 },
-        { header: 'Servicio', key: 'servicio', width: 22 },
-        { header: 'Acción', key: 'accion', width: 12 },
-        { header: 'Responsable', key: 'responsable', width: 20 },
-        { header: 'Módulo', key: 'modulo', width: 14 },
-        { header: 'ID Referencia', key: 'id_referencia', width: 14 },
-        { header: 'Precio Venta', key: 'precio_venta', width: 14 },
-        { header: 'Stock', key: 'stock', width: 10 },
-        { header: 'Eliminado', key: 'eliminado', width: 10 },
+        { header: 'Módulo', key: 'modulo', width: 16 },
+        { header: 'Acción', key: 'accion', width: 14 },
+        { header: 'Elemento Afectado', key: 'elemento', width: 40 },
+        { header: 'Responsable', key: 'responsable', width: 22 },
+        { header: 'Fecha', key: 'fecha', width: 20 },
       ],
       filename: 'Auditoria_Malfi.xlsx',
       sheetName: 'Auditoría',
-      headerColor: '1E8449'
+      headerColor: '6B21A8'
     });
   };
 
@@ -261,14 +248,14 @@ const AuditoriaPage = ({ user }) => {
       columnas: ['Fecha', 'Modulo', 'Accion', 'Elemento Afectado', 'Responsable'],
       filas: movimientos.map(m => [
         new Date(m.fecha).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }),
-        m.modulo || '-',
-        m.accion || '-',
+        (m.modulo || '-').toUpperCase(),
+        (m.accion || '-').toUpperCase(),
         getElementoAfectado(m),
-        m.responsable || '-'
+        (m.responsable || '-').replace(/_/g, ' ').toUpperCase()
       ]),
       filename: 'Auditoria_Malfi.pdf',
-      headerColor: [44, 62, 80],
-      accentColor: [52, 152, 219]
+      headerColor: [107, 33, 168],
+      accentColor: [134, 192, 70]
     });
   };
 
@@ -429,28 +416,45 @@ const AuditoriaPage = ({ user }) => {
           <div className="card-body p-4">
             <div className="row g-3 align-items-center">
 
-              {/* Fecha */}
+              {/* Fecha Desde */}
               <div className="col-md-2">
-                <input
-                  type="date"
-                  className="form-control rounded-pill border shadow-sm py-2"
-                  name="fechaEspecifica"
-                  value={filtros.fechaEspecifica}
-                  onChange={handleFiltroChange}
-                />
+                <div className="d-flex flex-column gap-1">
+                  <label className="form-label small fw-bold text-muted mb-0 ps-2">Desde</label>
+                  <input
+                    type="date"
+                    className="form-control rounded-pill border shadow-sm py-2"
+                    name="fechaDesde"
+                    value={filtros.fechaDesde}
+                    onChange={handleFiltroChange}
+                  />
+                </div>
+              </div>
+
+              {/* Fecha Hasta */}
+              <div className="col-md-2">
+                <div className="d-flex flex-column gap-1">
+                  <label className="form-label small fw-bold text-muted mb-0 ps-2">Hasta</label>
+                  <input
+                    type="date"
+                    className="form-control rounded-pill border shadow-sm py-2"
+                    name="fechaHasta"
+                    value={filtros.fechaHasta}
+                    onChange={handleFiltroChange}
+                  />
+                </div>
               </div>
 
               {/* Botones rápidos de fecha */}
-              <div className="col-md-2 d-flex gap-2">
+              <div className="col-md-2 d-flex gap-2 align-items-end pb-1">
                 <button
                   className="btn btn-outline-primary rounded-pill px-3 py-2 small fw-bold"
-                  onClick={() => { setFiltros(f => ({ ...f, fechaEspecifica: new Date().toISOString().split('T')[0] })); setPagina(1); }}
+                  onClick={() => { const hoy = new Date().toISOString().split('T')[0]; setFiltros(f => ({ ...f, fechaDesde: hoy, fechaHasta: hoy })); setPagina(1); }}
                 >
                   Hoy
                 </button>
                 <button
                   className="btn btn-outline-secondary rounded-pill px-3 py-2 small fw-bold"
-                  onClick={() => { setFiltros(f => ({ ...f, fechaEspecifica: '' })); setPagina(1); }}
+                  onClick={() => { setFiltros(f => ({ ...f, fechaDesde: '', fechaHasta: '' })); setPagina(1); }}
                 >
                   Ver todo
                 </button>
@@ -542,13 +546,15 @@ const AuditoriaPage = ({ user }) => {
             {/* Texto descriptivo del filtro activo */}
             <div className="mt-2 ps-1">
               <small className="text-muted fst-italic">
-                {!filtros.fechaEspecifica && !filtros.buscar && !filtros.filtroEmpleado
+                {!filtros.fechaDesde && !filtros.fechaHasta && !filtros.buscar && !filtros.filtroEmpleado
                   ? '📋 Mostrando todo el historial'
-                  : !filtros.fechaEspecifica
+                  : !filtros.fechaDesde && !filtros.fechaHasta
                   ? `🔍 Buscando en todo el historial${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`
-                  : filtros.fechaEspecifica === new Date().toISOString().split('T')[0]
+                  : filtros.fechaDesde === filtros.fechaHasta && filtros.fechaDesde === new Date().toISOString().split('T')[0]
                   ? `📅 Mostrando registros de hoy${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`
-                  : `📅 Mostrando registros del ${filtros.fechaEspecifica}${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`}
+                  : filtros.fechaDesde === filtros.fechaHasta
+                  ? `📅 Mostrando registros del ${filtros.fechaDesde}${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`
+                  : `📅 Mostrando registros del ${filtros.fechaDesde || '...'} al ${filtros.fechaHasta || '...'}${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`}
               </small>
             </div>
           </div>
@@ -584,8 +590,8 @@ const AuditoriaPage = ({ user }) => {
                       <td>{renderAccion(m.accion, m.eliminado)}</td>
                       <td className="fw-bold text-dark">{getElementoAfectado(m)}</td>
                       <td>
-                        <span className="badge bg-white text-dark border shadow-sm px-3 py-2 rounded-pill">
-                            <FontAwesomeIcon icon={faUser} className="me-2 text-muted" />{m.responsable || '-'}
+                        <span className="fw-bold text-dark" style={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          {(m.responsable || '-').replace(/_/g, ' ')}
                         </span>
                       </td>
                       <td className="small text-muted fw-bold">
