@@ -918,7 +918,7 @@ const TurnosPage = ({ user }) => {
                                         autoComplete="off"
                                         onChange={(e) => { setBusquedaMascota(e.target.value); setNuevoTurno({...nuevoTurno, mascota_id: '', dueno_id: ''}); }}
                                     />
-                                    {busquedaMascota && (
+                                    {busquedaMascota && !nuevoTurno.mascota_id && (
                                         <div style={{ position: 'absolute', zIndex: 9999, width: '100%', maxHeight: '200px', overflowY: 'auto', backgroundColor: 'white', border: '1px solid #dee2e6', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', top: '110%' }}>
                                             {mascotas.filter(m =>
                                                 m.nombre.toLowerCase().includes(busquedaMascota.toLowerCase()) ||
