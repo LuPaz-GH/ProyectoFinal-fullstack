@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+const API_BASE = import.meta.env.VITE_API_URL || '${API_BASE}';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
@@ -36,7 +37,7 @@ const DueñosPage = () => {
   const cargarDuenos = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/duenos');
+      const response = await fetch('${API_BASE}/api/duenos');
       if (!response.ok) throw new Error(`Error ${response.status}`);
       const data = await response.json();
       setDuenos(Array.isArray(data) ? data : []);
@@ -105,8 +106,8 @@ const DueñosPage = () => {
   const handleGuardar = async (formData) => {
     const esEdicion = !!datosEdicion;
     const url = esEdicion
-      ? `http://localhost:3001/api/duenos/${datosEdicion.id}`
-      : 'http://localhost:3001/api/duenos';
+      ? `${API_BASE}/api/duenos/${datosEdicion.id}`
+      : '${API_BASE}/api/duenos';
 
     try {
       const response = await fetch(url, {
@@ -133,7 +134,7 @@ const DueñosPage = () => {
   const handleConfirmarEliminacion = async () => {
     if (!idAEliminar) return;
     try {
-      const response = await fetch(`http://localhost:3001/api/duenos/${idAEliminar}`, { method: 'DELETE' });
+      const response = await fetch(`${API_BASE}/api/duenos/${idAEliminar}`, { method: 'DELETE' });
       if (response.ok) {
         setShowConfirm(false);
         setIdAEliminar(null);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+const API_BASE = import.meta.env.VITE_API_URL || '${API_BASE}';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock, faCheckCircle, faPaw, faArrowLeft, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -52,7 +53,7 @@ const ResetPassword = () => {
       console.log('[RESET] Email:', email || 'NO DISPONIBLE');
       console.log('[RESET] Nuevo usuario propuesto:', newUsuario.trim() || '(sin cambios)');
 
-      const response = await fetch('http://localhost:3001/api/recuperacion/forgot-password/reset-password', {
+      const response = await fetch('${API_BASE}/api/recuperacion/forgot-password/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

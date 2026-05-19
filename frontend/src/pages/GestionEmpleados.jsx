@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+const API_BASE = import.meta.env.VITE_API_URL || '${API_BASE}';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
@@ -66,7 +67,7 @@ const GestionEmpleados = () => {
   const fetchNotificaciones = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3001/api/auditoria/credenciales-empleados', {
+      const res = await fetch('${API_BASE}/api/auditoria/credenciales-empleados', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -113,7 +114,7 @@ const GestionEmpleados = () => {
 
   const fetchEmpleados = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/empleados');
+      const res = await fetch('${API_BASE}/api/empleados');
       if (!res.ok) throw new Error('Error al cargar empleados');
       const data = await res.json();
       setEmpleados(data.filter(emp => emp.activo === 1));
@@ -127,7 +128,7 @@ const GestionEmpleados = () => {
 
   const fetchEliminados = async () => {
     try {
-      const res = await fetch('http://localhost:3001/api/empleados/papelera');
+      const res = await fetch('${API_BASE}/api/empleados/papelera');
       if (!res.ok) throw new Error('Error al cargar papelera');
       const data = await res.json();
       setEmpleadosEliminados(data);
@@ -147,7 +148,7 @@ const GestionEmpleados = () => {
     if (!nuevaClave.trim()) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3001/api/empleados/${resetEmpleado.id}`, {
+      const res = await fetch(`${API_BASE}/api/empleados/${resetEmpleado.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ password: nuevaClave })
@@ -169,8 +170,8 @@ const GestionEmpleados = () => {
     try {
       const token = localStorage.getItem('token');
       const url = empleadoEdit 
-        ? `http://localhost:3001/api/empleados/${empleadoEdit.id}` 
-        : 'http://localhost:3001/api/empleados';
+        ? `${API_BASE}/api/empleados/${empleadoEdit.id}` 
+        : '${API_BASE}/api/empleados';
       const res = await fetch(url, {
         method: empleadoEdit ? 'PUT' : 'POST',
         headers: { 
@@ -192,7 +193,7 @@ const GestionEmpleados = () => {
   const eliminarLogico = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3001/api/empleados/${idToDelete}`, {
+      const res = await fetch(`${API_BASE}/api/empleados/${idToDelete}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -214,7 +215,7 @@ const GestionEmpleados = () => {
   const restaurarEmpleado = async (id) => {
     try {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:3001/api/empleados/restaurar/${id}`, {
+      await fetch(`${API_BASE}/api/empleados/restaurar/${id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -234,7 +235,7 @@ const GestionEmpleados = () => {
     if (!window.confirm("¿Eliminar permanentemente? Esta acción no tiene vuelta atrás.")) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3001/api/empleados/permanente/${id}`, { 
+      const res = await fetch(`${API_BASE}/api/empleados/permanente/${id}`, { 
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
