@@ -65,6 +65,7 @@ const TurnosPage = ({ user }) => {
     const [nuevoTurno, setNuevoTurno] = useState({
         mascota_id: '', dueno_id: '', fecha: '', hora: '', veterinario_id: 'aleatorio', tipo: 'consulta', motivo: '', es_urgencia: false, duracion: 15
     });
+    const [busquedaMascota, setBusquedaMascota] = useState('');
     // ACTUALIZADO: Nuevos campos para paciente no registrado en urgencias (CON DNI)
     const [datosAtencion, setDatosAtencion] = useState({
         peso: '',
@@ -908,12 +909,24 @@ const TurnosPage = ({ user }) => {
                             {/* Mascota */}
                             <div className="mb-3">
                                 <label className="form-label small fw-bold">Mascota *</label>
+                                <input
+                                    type="text"
+                                    className="form-control rounded-pill mb-2"
+                                    placeholder="Buscar mascota o dueño..."
+                                    value={busquedaMascota}
+                                    onChange={(e) => setBusquedaMascota(e.target.value)}
+                                />
                                 <select className="form-select rounded-pill" value={nuevoTurno.mascota_id} onChange={(e) => {
                                     const m = mascotas.find(mas => mas.id == e.target.value);
                                     if(m) setNuevoTurno({...nuevoTurno, mascota_id: e.target.value, dueno_id: m.dueno_id});
                                 }} required>
                                     <option value="">Seleccioná...</option>
-                                    {mascotas.map(m => (<option key={m.id} value={m.id}>{m.nombre} (Dueño: {m.dueno_nombre})</option>))}
+                                    {mascotas
+                                        .filter(m => {
+                                            const q = busquedaMascota.toLowerCase();
+                                            return m.nombre.toLowerCase().includes(q) || (m.dueno_nombre && m.dueno_nombre.toLowerCase().includes(q));
+                                        })
+                                        .map(m => (<option key={m.id} value={m.id}>{m.nombre} (Dueño: {m.dueno_nombre})</option>))}
                                 </select>
                             </div>
                             {/* Fecha */}
