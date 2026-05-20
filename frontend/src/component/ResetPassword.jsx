@@ -53,7 +53,7 @@ const ResetPassword = () => {
       console.log('[RESET] Email:', email || 'NO DISPONIBLE');
       console.log('[RESET] Nuevo usuario propuesto:', newUsuario.trim() || '(sin cambios)');
 
-      const response = await fetch('${API_BASE}/api/recuperacion/forgot-password/reset-password', {
+      const response = await fetch(`${API_BASE}/api/recuperacion/forgot-password/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -137,7 +137,7 @@ const ResetPassword = () => {
         <FontAwesomeIcon icon={faLock} size="4x" className="mb-4" style={{ color: '#663399' }} />
         <h3 className="fw-bold mb-1 text-center">Crear nueva contraseña</h3>
         <p className="text-muted text-center mb-4 small">
-          Ingresá tu nueva contraseña y usuario (opcional) para el acceso de Dueña/o
+          Ingresá tu nueva contraseña y usuario (opcional)
         </p>
 
         {error && <div className="alert alert-danger mb-4 text-center">{error}</div>}
