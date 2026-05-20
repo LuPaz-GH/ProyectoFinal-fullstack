@@ -30,6 +30,7 @@ const AppContent = () => {
     const saved = localStorage.getItem('user');
     return saved ? JSON.parse(saved) : null;
   });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const location = useLocation();
   const esLogin = location.pathname === '/login';
@@ -66,11 +67,21 @@ const AppContent = () => {
       className="d-flex flex-column flex-md-row min-vh-100" 
       style={{ background: esLogin ? 'none' : fondoGlobal }}
     >
-      {!esLogin && user && <Sidebar user={user} onLogout={handleLogout} />}
+      {!esLogin && user && (
+        <Sidebar user={user} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      )}
 
-      <main 
-        className="flex-grow-1 d-flex flex-column" 
-        style={{ marginLeft: esLogin || !user ? '0' : '280px', minHeight: '100vh' }}
+      {!esLogin && user && sidebarOpen && (
+        <div onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 3998 }} className="d-md-none" />
+      )}
+
+      {!esLogin && user && (
+        <button className="sidebar-toggle" onClick={() => setSidebarOpen(true)}>☰</button>
+      )}
+
+      <main
+        className={`flex-grow-1 d-flex flex-column ${!esLogin && user ? 'main-content' : ''}`}
+        style={{ minHeight: '100vh' }}
       >
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />

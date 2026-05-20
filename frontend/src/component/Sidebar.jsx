@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import ConfirmModal from './ConfirmModal';
 
-const Sidebar = ({ user: propUser, onLogout }) => {
+const Sidebar = ({ user: propUser, onLogout, isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -113,18 +113,27 @@ const Sidebar = ({ user: propUser, onLogout }) => {
   if (!user) return null;
 
   return (
-    <div className="d-flex flex-column flex-shrink-0 p-3 text-white shadow-lg" 
-         style={{ width: '280px', height: '100vh', background: colorFondo, 
-                  position: 'fixed', left: 0, top: 0, zIndex: 4000, overflowY: 'auto' }}>
-      <div className="d-flex align-items-center mb-5">
-        <div className="bg-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center shadow-sm" 
-             style={{ width: '50px', height: '50px', border: '2px solid rgba(0,0,0,0.1)' }}>
-          <FontAwesomeIcon icon={faPaw} size="xl" style={{ color: colorIconoPaw }} />
+    <>
+      {isOpen && (
+        <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 3999, display: 'none' }} className="d-md-none sidebar-overlay" />
+      )}
+    <div className="d-flex flex-column flex-shrink-0 p-3 text-white shadow-lg"
+         style={{ width: '280px', height: '100vh', background: colorFondo,
+                  position: 'fixed', left: 0, top: 0, zIndex: 4000, overflowY: 'auto',
+                  transform: typeof window !== 'undefined' && window.innerWidth < 768 && !isOpen ? 'translateX(-100%)' : 'translateX(0)',
+                  transition: 'transform 0.3s ease' }}>
+      <div className="d-flex align-items-center justify-content-between mb-5">
+        <div className="d-flex align-items-center">
+          <div className="bg-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center shadow-sm"
+               style={{ width: '50px', height: '50px', border: '2px solid rgba(0,0,0,0.1)' }}>
+            <FontAwesomeIcon icon={faPaw} size="xl" style={{ color: colorIconoPaw }} />
+          </div>
+          <div>
+            <span className="fs-4 fw-bold d-block">Malfi</span>
+            <span className="badge bg-white text-dark text-capitalize small">{rol}</span>
+          </div>
         </div>
-        <div>
-          <span className="fs-4 fw-bold d-block">Malfi</span>
-          <span className="badge bg-white text-dark text-capitalize small">{rol}</span>
-        </div>
+        <button className="btn btn-link text-white d-md-none p-0" onClick={onClose} style={{ fontSize: '1.5rem' }}>✕</button>
       </div>
 
       <ul className="nav nav-pills flex-column mb-auto">
@@ -156,17 +165,18 @@ const Sidebar = ({ user: propUser, onLogout }) => {
         <span className="fw-bold">Cerrar Sesión</span>
       </button>
 
-      <ConfirmModal 
-        show={showLogoutModal} 
-        onClose={() => setShowLogoutModal(false)} 
-        onConfirm={confirmarLogout} 
-        title="Cerrar sesión" 
-        message="¿Desea cerrar sesión?" 
-        confirmText="Sí, cerrar" 
-        cancelText="Cancelar" 
-        confirmColor="danger" 
+      <ConfirmModal
+        show={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={confirmarLogout}
+        title="Cerrar sesión"
+        message="¿Desea cerrar sesión?"
+        confirmText="Sí, cerrar"
+        cancelText="Cancelar"
+        confirmColor="danger"
       />
     </div>
+    </>
   );
 };
 
