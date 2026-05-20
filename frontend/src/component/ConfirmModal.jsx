@@ -1,5 +1,6 @@
 // src/component/ConfirmModal.jsx
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 const ConfirmModal = ({
   show,
@@ -17,19 +18,19 @@ const ConfirmModal = ({
 
   const btnClass = `btn btn-${confirmColor} px-5 py-2 rounded-pill fw-bold shadow-sm`;
 
-  return (
-    <div 
-      className="modal fade show d-block" 
-      tabIndex="-1" 
-      style={{ 
-        backgroundColor: 'rgba(0,0,0,0.6)', 
-        zIndex: 3000, 
+  return ReactDOM.createPortal(
+    <div
+      className="modal fade show d-block"
+      tabIndex="-1"
+      style={{
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        zIndex: 9999,
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        ...style 
+        ...style
       }}
     >
       <div className="modal-dialog modal-dialog-centered">
@@ -44,16 +45,16 @@ const ConfirmModal = ({
             <p className="fs-5 text-muted mb-4">{message}</p>
             <div className="d-flex justify-content-center gap-3">
               {showCancel && (
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-light px-5 py-2 rounded-pill fw-bold shadow-sm"
                   onClick={onClose}
                 >
                   {cancelText}
                 </button>
               )}
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={btnClass}
                 onClick={onConfirm}
               >
@@ -63,7 +64,8 @@ const ConfirmModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
