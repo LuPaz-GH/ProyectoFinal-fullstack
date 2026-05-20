@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faTools, faSave, faEdit, faCheckCircle, faStethoscope, 
+import {
+    faTools, faSave, faEdit, faCheckCircle, faStethoscope,
     faScissors, faArrowLeft, faChevronLeft, faChevronRight,
-    faTrash, faTrashRestore, faTimes, faExclamationTriangle, faInfoCircle, faToggleOff, faEyeSlash
+    faTrash, faTrashRestore, faTimes, faExclamationTriangle, faInfoCircle, faToggleOff, faEyeSlash, faPlus
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../services/api';
 
@@ -13,6 +13,8 @@ const ConfiguracionPage = () => {
     const [editando, setEditando] = useState(null);
     const [nuevoPrecio, setNuevoPrecio] = useState('');
     const [showPapelera, setShowPapelera] = useState(false);
+    const [showAgregar, setShowAgregar] = useState(false);
+    const [nuevoServicio, setNuevoServicio] = useState({ nombre: '', precio: '' });
 
     // --- ESTADOS PARA NUEVOS MODALES ESTÉTICOS ---
     const [confirmModal, setConfirmModal] = useState({ show: false, servicio: null });
@@ -102,6 +104,23 @@ const ConfiguracionPage = () => {
         }
     };
 
+    const handleAgregarServicio = async () => {
+        if (!nuevoServicio.nombre.trim() || !nuevoServicio.precio || isNaN(nuevoServicio.precio)) {
+            showToast("Ingresá un nombre y precio válidos", "error");
+            return;
+        }
+        try {
+            await api.post('/servicios', { nombre: nuevoServicio.nombre, precio: parseFloat(nuevoServicio.precio), categoria: 'veterinaria' });
+            setShowAgregar(false);
+            setNuevoServicio({ nombre: '', precio: '' });
+            await fetchServicios();
+            showToast(`Servicio "${nuevoServicio.nombre}" agregado`, "success");
+        } catch (err) {
+            console.error(err);
+            showToast("Error al agregar el servicio", "error");
+        }
+    };
+
     const restaurarServicio = async (servicio) => {
         try {
             await api.put(`/servicios/${servicio.id}`, { 
@@ -131,9 +150,14 @@ const ConfiguracionPage = () => {
                     <button className="btn btn-light rounded-pill px-4 py-2 shadow-sm fw-bold" onClick={() => window.location.href = '/caja'}>
                         <FontAwesomeIcon icon={faArrowLeft} className="me-2" /> Volver
                     </button>
-                    <button className="btn btn-danger rounded-pill px-4 py-2 shadow-sm fw-bold" onClick={() => setShowPapelera(true)}>
-                        <FontAwesomeIcon icon={faEyeSlash} className="me-2" /> Inactivos ({serviciosEliminados.length})
-                    </button>
+                    <div className="d-flex gap-2">
+                        <button className="btn btn-success rounded-pill px-4 py-2 shadow-sm fw-bold" onClick={() => setShowAgregar(true)}>
+                            <FontAwesomeIcon icon={faPlus} className="me-2" /> Agregar Servicio
+                        </button>
+                        <button className="btn btn-danger rounded-pill px-4 py-2 shadow-sm fw-bold" onClick={() => setShowPapelera(true)}>
+                            <FontAwesomeIcon icon={faEyeSlash} className="me-2" /> Inactivos ({serviciosEliminados.length})
+                        </button>
+                    </div>
                 </div>
 
                 <h2 className="fw-bold mb-4 text-white" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
@@ -211,6 +235,48 @@ const ConfiguracionPage = () => {
                     </div>
                 </div>
             </div>
+
+            {/* MODAL AGREGAR SERVICIO */}
+            {showAgregar && (
+                <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 2200, backdropFilter: 'blur(3px)' }}>
+                    <div className="modal-dialog modal-dialog-centered modal-sm" style={{ maxWidth: '380px' }}>
+                        <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                            <div className="p-4 text-white" style={{ backgroundColor: '#198754' }}>
+                                <h5 className="fw-bold m-0"><FontAwesomeIcon icon={faPlus} className="me-2" /> Nuevo Servicio</h5>
+                            </div>
+                            <div className="p-4">
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold small text-muted text-uppercase">Nombre del servicio</label>
+                                    <input
+                                        type="text"
+                                        className="form-control rounded-pill border px-3"
+                                        placeholder="Ej: Radiografía"
+                                        value={nuevoServicio.nombre}
+                                        onChange={e => setNuevoServicio({ ...nuevoServicio, nombre: e.target.value })}
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="form-label fw-bold small text-muted text-uppercase">Precio</label>
+                                    <div className="input-group rounded-pill overflow-hidden border">
+                                        <span className="input-group-text bg-white border-0 text-muted">$</span>
+                                        <input
+                                            type="number"
+                                            className="form-control border-0 shadow-none"
+                                            placeholder="0"
+                                            value={nuevoServicio.precio}
+                                            onChange={e => setNuevoServicio({ ...nuevoServicio, precio: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="d-flex gap-2">
+                                    <button className="btn btn-light rounded-pill w-50 fw-bold border" onClick={() => { setShowAgregar(false); setNuevoServicio({ nombre: '', precio: '' }); }}>Cancelar</button>
+                                    <button className="btn btn-success rounded-pill w-50 fw-bold" onClick={handleAgregarServicio}>Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ============================================================ */}
             {/* 1. NUEVO MODAL ESTÉTICO DE CONFIRMACIÓN (Reemplaza confirm) */}

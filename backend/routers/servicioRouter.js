@@ -14,6 +14,29 @@ router.get('/', async (req, res) => {
     }
 });
 
+// POST - Crear un nuevo servicio
+router.post('/', async (req, res) => {
+    const { nombre, precio, categoria } = req.body;
+    if (!nombre || !precio || !categoria) {
+        return res.status(400).json({ error: 'Nombre, precio y categoría son requeridos' });
+    }
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO servicios (nombre, precio, categoria, activo) VALUES (?, ?, ?, 1)',
+            [nombre.trim(), parseFloat(precio), categoria]
+        );
+        await pool.query(
+            `INSERT INTO auditoria (fecha, producto, categoria, accion, responsable, modulo, precio_venta, id_referencia, eliminado)
+             VALUES (NOW(), ?, 'servicio', 'Creado', 'Admin', 'otros', ?, ?, 0)`,
+            [`Servicio: ${nombre.trim()}`, parseFloat(precio), result.insertId]
+        );
+        res.status(201).json({ success: true, id: result.insertId });
+    } catch (err) {
+        console.error("Error al crear servicio:", err);
+        res.status(500).json({ error: 'Error al crear servicio' });
+    }
+});
+
 // PUT - Actualizar precio o estado (activo/inactivo) de un servicio
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
