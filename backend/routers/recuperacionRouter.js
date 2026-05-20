@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../config/db');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
-const { enviarEmailRecuperacion } = require('../utils/email');
+const { enviarEmail } = require('../services/emailService');
 const fetch = require('node-fetch');
 
 // =====================================================
@@ -179,10 +179,29 @@ router.post('/forgot-password-email', async (req, res) => {
       [token, expires, user.id]
     );
 
-    const emailEnviado = await enviarEmailRecuperacion(emailLimpio, token, user.nombre);
+    const frontendUrl = process.env.FRONTEND_URL || 'https://malfi-veterinaria.netlify.app';
+    const resetLink = `${frontendUrl}/reset-password?token=${token}`;
 
-    if (!emailEnviado) {
-      console.error('[FORGOT-PASSWORD-EMAIL] Fallo al enviar email');
+    try {
+      await enviarEmail(
+        emailLimpio,
+        'Recuperar acceso - Malfi Veterinaria',
+        `Hola ${user.nombre},\n\nUsá este enlace para recuperar tu acceso (válido por 1 hora):\n${resetLink}\n\nSi no fuiste vos, ignorá este email.\n\nEquipo Malfi Veterinaria`,
+        `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+          <h2 style="color:#663399">Hola ${user.nombre},</h2>
+          <p>Recibimos una solicitud para recuperar tu acceso en <strong>Malfi Veterinaria</strong>.</p>
+          <p style="margin:30px 0">
+            <a href="${resetLink}" style="background:#663399;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">
+              Recuperar mi acceso
+            </a>
+          </p>
+          <p>El enlace expira en <strong>1 hora</strong>.</p>
+          <p>Si no pediste esto, podés ignorar este email.</p>
+          <p style="color:#666;font-size:13px">Equipo Malfi Veterinaria</p>
+        </div>`
+      );
+    } catch (emailError) {
+      console.error('[FORGOT-PASSWORD-EMAIL] Error al enviar email:', emailError.message);
       return res.status(500).json({ success: false, message: 'Error al enviar el email de recuperación' });
     }
 

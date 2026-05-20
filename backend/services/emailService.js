@@ -22,7 +22,7 @@ const enviarEmail = async (toEmail, subject, text, html = null) => {
       .request({
         Messages: [{
           From: {
-            Email: 'lucianadanizapaz@hotmail.com',
+            Email: 'danizapaz50@gmail.com',
             Name: 'Veterinaria Malfi'
           },
           To: [{
