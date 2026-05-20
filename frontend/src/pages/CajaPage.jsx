@@ -41,7 +41,6 @@ const CajaPage = ({ user }) => {
     const [busquedaProd, setBusquedaProd] = useState('');
     const [sugerenciasProd, setSugerenciasProd] = useState([]);
     const [mostrarProd, setMostrarProd] = useState(false);
-    const [mostrarEstetica, setMostrarEstetica] = useState(false);
     const [mostrarVet, setMostrarVet] = useState(false);
 
     const [carrito, setCarrito] = useState([]);
@@ -59,7 +58,6 @@ const CajaPage = ({ user }) => {
     const registrosPorPagina = 10;
     
     const wrapperRefProd = useRef(null);
-    const wrapperRefEstetica = useRef(null);
     const wrapperRefVet = useRef(null);
     const wrapperRefCliente = useRef(null);
 
@@ -73,7 +71,6 @@ const CajaPage = ({ user }) => {
         cargarPapeleraCaja();
         const handleClickOutside = (event) => {
             if (wrapperRefProd.current && !wrapperRefProd.current.contains(event.target)) setMostrarProd(false);
-            if (wrapperRefEstetica.current && !wrapperRefEstetica.current.contains(event.target)) setMostrarEstetica(false);
             if (wrapperRefVet.current && !wrapperRefVet.current.contains(event.target)) setMostrarVet(false);
             if (wrapperRefCliente.current && !wrapperRefCliente.current.contains(event.target)) setMostrarClientes(false);
         };
@@ -129,7 +126,6 @@ const CajaPage = ({ user }) => {
     };
 
     const listaVet = serviciosBD.filter(s => s.categoria === 'veterinaria');
-    const listaEstetica = serviciosBD.filter(s => s.categoria === 'estetica');
 
     const ultimoIndice = paginaActual * registrosPorPagina;
     const primerIndice = ultimoIndice - registrosPorPagina;

@@ -35,8 +35,8 @@ const ConfiguracionPage = () => {
     const fetchServicios = async () => {
         try {
             const res = await api.get('/servicios');
-            const activos = res.data.filter(s => s.activo === 1 || s.activo === true);
-            const eliminados = res.data.filter(s => s.activo === 0 || s.activo === false);
+            const activos = res.data.filter(s => (s.activo === 1 || s.activo === true) && s.categoria === 'veterinaria');
+            const eliminados = res.data.filter(s => (s.activo === 0 || s.activo === false) && s.categoria === 'veterinaria');
             setServicios(activos);
             setServiciosEliminados(eliminados);
         } catch (err) {
