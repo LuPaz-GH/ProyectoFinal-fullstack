@@ -182,6 +182,7 @@ router.post('/forgot-password-email', async (req, res) => {
     const emailEnviado = await enviarEmailRecuperacion(emailLimpio, token, user.nombre);
 
     if (!emailEnviado) {
+      console.error('[FORGOT-PASSWORD-EMAIL] Fallo al enviar email');
       return res.status(500).json({ success: false, message: 'Error al enviar el email de recuperación' });
     }
 
