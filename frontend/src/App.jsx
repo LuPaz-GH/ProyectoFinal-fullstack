@@ -16,6 +16,7 @@ import GestionEmpleados from './pages/GestionEmpleados';
 import AuditoriaPage from './pages/AuditoriaPage';
 import ResetPassword from './component/ResetPassword';
 import ConfiguracionPage from './pages/ConfiguracionPage';
+import Footer from './component/Footer';
 
 // ==================== IMPORTS OCULTADOS TEMPORALMENTE ====================
 // import EsteticaPage from './pages/EsteticaPage';
@@ -85,11 +86,7 @@ const AppContent = () => {
       >
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          
-          {/* ✅ CORRECCIÓN: Pasar setUser como prop al LoginPage */}
           <Route path="/login" element={<LoginPage setUser={setUser} />} />
-          
-          {/* ✅ CORRECCIÓN: Protección de ruta /home con fallback claro */}
           <Route 
             path="/home" 
             element={
@@ -156,6 +153,7 @@ const AppContent = () => {
           
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
+        {!esLogin && user && <Footer />}
       </main>
     </div>
   );
