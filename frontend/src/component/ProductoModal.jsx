@@ -6,7 +6,7 @@ const ProductoModal = ({ show, onClose, onGuardar, datosEdicion, categoria }) =>
     precio_venta: '',
     stock: '',
     stock_minimo: 5,
-    info: '' // Aquí guardamos el vencimiento
+    info: '' 
   });
 
   useEffect(() => {
@@ -61,9 +61,12 @@ const ProductoModal = ({ show, onClose, onGuardar, datosEdicion, categoria }) =>
             </div>
             {categoria !== 'petshop' && (
               <div className="mb-3">
-                <label className="form-label small fw-bold">Vencimiento (opcional)</label>
-                <input type="date" className="form-control" value={formData.info ? formData.info.split('T')[0] : ''} 
-                       onChange={(e) => setFormData({...formData, info: e.target.value})} />
+                <label className="form-label small fw-bold">
+                  Vencimiento {categoria !== 'alimentos' && '(opcional)'}
+                </label>
+                <input type="date" className="form-control" value={formData.info ? formData.info.split('T')[0] : ''}
+                       onChange={(e) => setFormData({...formData, info: e.target.value})}
+                       required={categoria === 'alimentos'} />
               </div>
             )}
           </div>
