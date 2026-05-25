@@ -243,7 +243,7 @@ const operacionService = {
         }
     },
 
-    // 3. TURNOS GENERALES - CORREGIDO PARA "ESTA SEMANA"
+    // 3. TURNOS GENERALES 
     getTurnos: async (query = {}) => {
         const { fecha, fechaDesde, fechaHasta, pagina = 1, limite = 12, soloPendientes = 'true' } = query;
         const offset = (parseInt(pagina) - 1) * parseInt(limite);
@@ -331,7 +331,7 @@ const operacionService = {
         return rows;
     },
 
-    // ✅ FUNCIÓN AGREGADA - MOVER A PAPELERA (SOFT DELETE)
+
     eliminarTurno: async (id, usuarioId) => {
         await pool.query(
             'UPDATE turnos SET fecha_borrado = NOW(), borrado_por = ? WHERE id = ?',
@@ -402,16 +402,30 @@ const operacionService = {
                 const fechaInput = new Date(fecha);
                 const fechaInputUTC = fechaInput.toISOString();
 
-                const [solapados] = await connection.query(
-                    `SELECT id, fecha, tipo, estado, COALESCE(duracion, 15) as duracion
-                     FROM turnos
-                     WHERE tipo != 'estetica'
-                       AND estado NOT IN ('realizado', 'cancelado')
-                       AND fecha_borrado IS NULL
-                       AND ? < DATE_ADD(fecha, INTERVAL COALESCE(duracion, 15) MINUTE)
-                       AND fecha < DATE_ADD(?, INTERVAL ? MINUTE)`,
-                    [fechaInputUTC, fechaInputUTC, duracionMinutos]
-                );
+                let solapados;
+                if (veterinario_id) {
+                    [solapados] = await connection.query(
+                        `SELECT id FROM turnos
+                         WHERE tipo != 'estetica'
+                           AND estado NOT IN ('realizado', 'cancelado')
+                           AND fecha_borrado IS NULL
+                           AND veterinario_id = ?
+                           AND ? < DATE_ADD(fecha, INTERVAL COALESCE(duracion, 15) MINUTE)
+                           AND fecha < DATE_ADD(?, INTERVAL ? MINUTE)`,
+                        [veterinario_id, fechaInputUTC, fechaInputUTC, duracionMinutos]
+                    );
+                } else {
+                    [solapados] = await connection.query(
+                        `SELECT id FROM turnos
+                         WHERE tipo != 'estetica'
+                           AND estado NOT IN ('realizado', 'cancelado')
+                           AND fecha_borrado IS NULL
+                           AND veterinario_id IS NULL
+                           AND ? < DATE_ADD(fecha, INTERVAL COALESCE(duracion, 15) MINUTE)
+                           AND fecha < DATE_ADD(?, INTERVAL ? MINUTE)`,
+                        [fechaInputUTC, fechaInputUTC, duracionMinutos]
+                    );
+                }
 
                 if (solapados.length > 0) {
                     await connection.rollback();
@@ -669,9 +683,8 @@ const operacionService = {
         );
     },
 
-    // =============================================
     // getReportesDashboard
-    // =============================================
+    
     getReportesDashboard: async () => {
         try {
             console.log('📊 [Dashboard] Obteniendo reportes...');
