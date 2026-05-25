@@ -52,7 +52,7 @@ const TurnosPage = ({ user }) => {
     const [mensajeSolapamiento, setMensajeSolapamiento] = useState('');
     const [verificandoDisponibilidad, setVerificandoDisponibilidad] = useState(false);
     const [disponibilidadPorMedico, setDisponibilidadPorMedico] = useState({});
-    // ✅ NUEVOS ESTADOS PARA SELECTOR VISUAL DE HORAS CON COLORES
+    //  NUEVOS ESTADOS PARA SELECTOR VISUAL DE HORAS CON COLORES
     const [horariosOcupados, setHorariosOcupados] = useState({});
     const [showTimeSelector, setShowTimeSelector] = useState(false);
     // DURACIONES DISPONIBLES PARA TURNOS
@@ -66,7 +66,7 @@ const TurnosPage = ({ user }) => {
         mascota_id: '', dueno_id: '', fecha: '', hora: '', veterinario_id: 'aleatorio', tipo: 'consulta', motivo: '', es_urgencia: false, duracion: 15
     });
     const [busquedaMascota, setBusquedaMascota] = useState('');
-    // ACTUALIZADO: Nuevos campos para paciente no registrado en urgencias (CON DNI)
+    // ACTUALIZADO: Nuevos campos para paciente no registrado en urgencias 
     const [datosAtencion, setDatosAtencion] = useState({
         peso: '',
         unidad: 'kg',
@@ -94,7 +94,7 @@ const TurnosPage = ({ user }) => {
             console.error('Error al cargar veterinarios:', err);
         }
     };
-    // ✅ FUNCIÓN SIMPLE PARA CARGAR HORARIOS OCUPADOS
+    //  FUNCIÓN SIMPLE PARA CARGAR HORARIOS OCUPADOS
     const cargarHorariosOcupados = async (fecha, veterinarioId) => {
         if (!fecha) {
             setHorariosOcupados({});
@@ -131,7 +131,7 @@ const TurnosPage = ({ user }) => {
             setHorariosOcupados({});
         }
     };
-    // ✅ FUNCIÓN CORREGIDA PARA VERIFICAR DISPONIBILIDAD DE HORARIO POR MÉDICO
+    //  FUNCIÓN CORREGIDA PARA VERIFICAR DISPONIBILIDAD DE HORARIO POR MÉDICO
     const verificarDisponibilidadHorario = async (fecha, hora, duracion, veterinarioId, turnoIdExcluir = null) => {
         if (!fecha || !hora) return true;
      
@@ -204,13 +204,13 @@ const TurnosPage = ({ user }) => {
             setVerificandoDisponibilidad(false);
         }
     };
-    // ✅ EFFECT PARA CARGAR HORARIOS OCUPADOS CUANDO CAMBIA LA FECHA O VETERINARIO
+    //  EFFECT PARA CARGAR HORARIOS OCUPADOS CUANDO CAMBIA LA FECHA O VETERINARIO
     useEffect(() => {
         if (showModal && nuevoTurno.fecha) {
             cargarHorariosOcupados(nuevoTurno.fecha, nuevoTurno.veterinario_id);
         }
     }, [showModal, nuevoTurno.fecha, nuevoTurno.veterinario_id]);
-    // ✅ EFFECT PARA VERIFICAR DISPONIBILIDAD
+    //  EFFECT PARA VERIFICAR DISPONIBILIDAD
     useEffect(() => {
         if (nuevoTurno.fecha && nuevoTurno.hora && showModal) {
             const timeoutId = setTimeout(() => {
@@ -714,7 +714,7 @@ const TurnosPage = ({ user }) => {
                         <button className="btn btn-danger rounded-pill px-4 fw-bold shadow" onClick={() => { setTurnoSeleccionado(null); setShowAtencion(true); }}>
                             <FontAwesomeIcon icon={faAmbulance} className="me-2" /> URGENCE
                         </button>
-                        <button className="btn btn-primary rounded-pill px-4 fw-bold shadow" onClick={() => { setDatosEdicion(null); setNuevoTurno({ mascota_id: '', dueno_id: '', fecha: '', hora: '', veterinario_id: 'aleatorio', tipo: 'consulta', motivo: '', es_urgencia: false, duracion: 15 }); setShowModal(true); }}>
+                        <button className="btn btn-primary rounded-pill px-4 fw-bold shadow" onClick={() => { setDatosEdicion(null); setBusquedaMascota(''); setNuevoTurno({ mascota_id: '', dueno_id: '', fecha: '', hora: '', veterinario_id: 'aleatorio', tipo: 'consulta', motivo: '', es_urgencia: false, duracion: 15 }); setShowModal(true); }}>
                             <FontAwesomeIcon icon={faPlus} className="me-2" /> Nuevo Turno
                         </button>
                     </div>
@@ -1336,7 +1336,7 @@ const TurnosPage = ({ user }) => {
                     </div>
                 </div>
             )}
-            {/* CONFIRM MODALS - CORREGIDOS */}
+            {/* CONFIRM MODALS */}
             <ConfirmModal
                 show={showConfirm}
                 onClose={() => setShowConfirm(false)}
