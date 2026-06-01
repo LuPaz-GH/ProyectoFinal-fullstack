@@ -18,7 +18,7 @@ const LoginPage = ({ setUser }) => {
   const [showRecuperacionAdmin, setShowRecuperacionAdmin] = useState(false);
   const [showRecuperacionEmpleado, setShowRecuperacionEmpleado] = useState(false);
 
-  // ✅ ACTUALIZADO: ahora solo necesitamos el email para recuperación
+
   const [recuperacionForm, setRecuperacionForm] = useState({ email: '', usuario: '' });
   const [recuperacionEnviada, setRecuperacionEnviada] = useState(false);
   const [enviandoRecuperacion, setEnviandoRecuperacion] = useState(false);
@@ -28,7 +28,7 @@ const LoginPage = ({ setUser }) => {
     { id: 'admin', nombre: 'Dueña/o', icono: faUserShield, color: '#663399' },
     { id: 'veterinario', nombre: 'Veterinario', icono: faUserMd, color: '#007bff' },
     { id: 'recepcionista', nombre: 'Recepcionista', icono: faUserEdit, color: '#28a745' },
-    // { id: 'peluquero', nombre: 'Peluquero', icono: faCut, color: '#ff69b4' } // OCULTO TEMPORALMENTE
+    // { id: 'peluquero', nombre: 'Peluquero', icono: faCut, color: '#ff69b4' } // 
   ];
 
   const manejarLogin = async (e) => {
@@ -123,7 +123,7 @@ const LoginPage = ({ setUser }) => {
     }
   };
 
-  // ✅ NUEVA FUNCIÓN: Recuperación solo con email (flujo final deseado)
+  // FUNCIÓN: Recuperación solo con email 
   const enviarRecuperacionPorEmail = async (e) => {
     e.preventDefault();
     setEnviandoRecuperacion(true);
@@ -147,7 +147,7 @@ const LoginPage = ({ setUser }) => {
     }
   };
 
-  // ✅ NUEVO: función que usa usuario + email alternativo (se mantiene por compatibilidad)
+  // función que usa usuario + email alternativo 
   const enviarRecuperacionPorUsuario = async (e) => {
     e.preventDefault();
     setEnviandoRecuperacion(true);
@@ -172,7 +172,7 @@ const LoginPage = ({ setUser }) => {
     }
   };
 
-  // Función original para empleados (se mantiene por compatibilidad, no se renderiza ahora)
+  // Función original para empleados 
   const enviarRecuperacionEmpleado = async (e) => {
     e.preventDefault();
     setEnviandoRecuperacion(true);
@@ -222,7 +222,7 @@ const LoginPage = ({ setUser }) => {
                 <div className="col-6 col-md-5">
                   <button className="btn w-100 p-3 rounded-4 border-0 shadow-sm"
                     style={{ background: 'white', color: roles[0].color, border: `2px solid ${roles[0].color}` }}
-                    onClick={() => setRolSeleccionado(roles[0])}>
+                    onClick={() => { setRolSeleccionado(roles[0]); setCredenciales({ usuario: '', clave: '' }); setError(''); }}>
                     <FontAwesomeIcon icon={roles[0].icono} size="2x" className="mb-2" />
                     <div className="fw-bold small">{roles[0].nombre}</div>
                   </button>
@@ -231,7 +231,7 @@ const LoginPage = ({ setUser }) => {
                 <div className="col-6 col-md-5">
                   <button className="btn w-100 p-3 rounded-4 border-0 shadow-sm"
                     style={{ background: 'white', color: roles[1].color, border: `2px solid ${roles[1].color}` }}
-                    onClick={() => setRolSeleccionado(roles[1])}>
+                    onClick={() => { setRolSeleccionado(roles[1]); setCredenciales({ usuario: '', clave: '' }); setError(''); }}>
                     <FontAwesomeIcon icon={roles[1].icono} size="2x" className="mb-2" />
                     <div className="fw-bold small">{roles[1].nombre}</div>
                   </button>
@@ -241,7 +241,7 @@ const LoginPage = ({ setUser }) => {
               <div className="col-6 col-md-5 mx-auto">
                 <button className="btn w-100 p-3 rounded-4 border-0 shadow-sm"
                   style={{ background: 'white', color: roles[2].color, border: `2px solid ${roles[2].color}` }}
-                  onClick={() => setRolSeleccionado(roles[2])}>
+                  onClick={() => { setRolSeleccionado(roles[2]); setCredenciales({ usuario: '', clave: '' }); setError(''); }}>
                   <FontAwesomeIcon icon={roles[2].icono} size="2x" className="mb-2" />
                   <div className="fw-bold small">{roles[2].nombre}</div>
                 </button>
@@ -254,6 +254,7 @@ const LoginPage = ({ setUser }) => {
               onClick={() => {
                 setRolSeleccionado(null);
                 setError('');
+                setCredenciales({ usuario: '', clave: '' });
               }}
               style={{ top: '-20px', left: '-20px', background: 'white', width: '50px', height: '50px', color: rolSeleccionado.color, border: `2px solid ${rolSeleccionado.color}` }}>
               <FontAwesomeIcon icon={faArrowLeft} />
@@ -264,13 +265,15 @@ const LoginPage = ({ setUser }) => {
             <form onSubmit={manejarLogin}>
               <div className="input-group mb-3">
                 <span className="input-group-text bg-light border-0 rounded-start-pill text-muted"><FontAwesomeIcon icon={faUser} /></span>
-                <input type="text" className="form-control bg-light border-0 rounded-end-pill py-3" placeholder="Usuario" 
-                  value={credenciales.usuario} onChange={(e) => setCredenciales({ ...credenciales, usuario: e.target.value })} required />
+                <input type="text" className="form-control bg-light border-0 rounded-end-pill py-3" placeholder="Usuario"
+                  value={credenciales.usuario} onChange={(e) => setCredenciales({ ...credenciales, usuario: e.target.value })}
+                  autoComplete="off" required />
               </div>
               <div className="input-group mb-4">
                 <span className="input-group-text bg-light border-0 rounded-start-pill text-muted"><FontAwesomeIcon icon={faLock} /></span>
-                <input type="password" className="form-control bg-light border-0 rounded-end-pill py-3" placeholder="Contraseña" 
-                  value={credenciales.clave} onChange={(e) => setCredenciales({ ...credenciales, clave: e.target.value })} required />
+                <input type="password" className="form-control bg-light border-0 rounded-end-pill py-3" placeholder="Contraseña"
+                  value={credenciales.clave} onChange={(e) => setCredenciales({ ...credenciales, clave: e.target.value })}
+                  autoComplete="new-password" required />
               </div>
               <button type="submit" className="btn text-white w-100 rounded-pill py-3 fw-bold shadow"
                 style={{ background: rolSeleccionado.color }} disabled={loading}>
@@ -305,7 +308,7 @@ const LoginPage = ({ setUser }) => {
         )}
       </div>
 
-      {/* ==================== MODAL DE RECUPERACIÓN (ACTUALIZADO - SOLO EMAIL) ==================== */}
+      {/* ==================== MODAL DE RECUPERACIÓN  ==================== */}
       {showRecuperacionAdmin && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
@@ -343,7 +346,7 @@ const LoginPage = ({ setUser }) => {
                     </button>
                   </div>
                 ) : (
-                  // ✅ FORMULARIO ACTUALIZADO: solo se pide el email
+                  
                   <form onSubmit={enviarRecuperacionPorEmail}>
                     <div className="mb-3">
                       <label className="form-label fw-bold">Email</label>
@@ -374,7 +377,7 @@ const LoginPage = ({ setUser }) => {
         </div>
       )}
 
-      {/* Modal empleados - se mantiene por compatibilidad (no se renderiza en el flujo actual) */}
+      {/* Modal empleados */}
       {showRecuperacionEmpleado && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
