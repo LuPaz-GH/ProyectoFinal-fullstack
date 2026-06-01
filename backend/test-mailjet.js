@@ -6,7 +6,7 @@ const Mailjet = require('node-mailjet');
  */
 const enviarEmail = async (toEmail, subject, text, html = null) => {
   try {
-    // Creamos la conexión AQUÍ, no al inicio del archivo
+    // Creamos la conexión 
     const mailjet = new Mailjet({
       apiKey: process.env.MJ_APIKEY_PUBLIC,
       apiSecret: process.env.MJ_APIKEY_PRIVATE

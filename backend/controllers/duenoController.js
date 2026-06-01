@@ -34,19 +34,19 @@ const duenoController = {
             
             const id = await duenoService.create(req.body);
 
-            // ==================== AUDITORÍA CON REINTENTOS MEJORADOS ====================
+            // ==================== AUDITORÍA  ====================
             if (usuarioId) {
                 const [empleado] = await pool.query('SELECT nombre FROM empleados WHERE id = ?', [usuarioId]);
                 const responsableNombre = empleado[0]?.nombre || 'Sistema';
 
                 let nombreMascota = null;
 
-                // 1. Primer intento desde el payload que envía el frontend
+                
                 if (mascotas && Array.isArray(mascotas) && mascotas.length > 0) {
                     nombreMascota = mascotas[0].nombre || null;
                 }
 
-                // 2. Si no vino en el payload, reintentamos buscando en la base de datos
+                
                 if (!nombreMascota) {
                     console.log(`⏳ [AUDITORIA CREATE] Esperando mascotas para dueño ID: ${id} - Nombre: ${nombre}`);
                     

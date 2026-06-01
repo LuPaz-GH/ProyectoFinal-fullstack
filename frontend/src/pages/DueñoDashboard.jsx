@@ -61,7 +61,7 @@ const DueñoDashboard = () => {
     });
     const dashboardRef = useRef(null);
 
-    // Actualizar dimensiones de gráficos al montar y redimensionar
+    // Actualiza dimensiones de gráficos al montar y redimensionar
     useEffect(() => {
         const updateDimensions = () => {
             if (dashboardRef.current) {
@@ -73,7 +73,7 @@ const DueñoDashboard = () => {
             }
         };
 
-        // Ejecutar después de un pequeño delay para asegurar que el DOM está listo
+        // Ejecuta después de un pequeño delay para asegurar que el DOM está listo
         const timer = setTimeout(updateDimensions, 100);
         
         window.addEventListener('resize', updateDimensions);

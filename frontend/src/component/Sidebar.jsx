@@ -12,14 +12,9 @@ const Sidebar = ({ user: propUser, onLogout, isOpen, onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  // Priorizar user por props, sino fallback a localStorage
   const user = propUser || JSON.parse(localStorage.getItem('user')) || null;
   const rolRaw = user?.rol || 'invitado';
-  
-  // Normalizar rol para evitar problemas de mayúsculas/espacios
   const rol = rolRaw?.toLowerCase().trim();
-
   const esAdmin = rol === 'admin';
   const esVeterinario = rol === 'veterinario';
   const esRecepcionista = rol === 'recepcionista';

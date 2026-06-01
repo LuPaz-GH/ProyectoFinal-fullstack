@@ -69,7 +69,7 @@ const ConfiguracionPage = () => {
         }
     };
 
-    // FUNCIÓN CORREGIDA: Mover a papelera
+    // FUNCIÓN: Mover a papelera
     const moverAPapelera = async (id) => {
         if (!window.confirm("¿Mover este servicio a la papelera?")) return;
         try {
@@ -86,11 +86,11 @@ const ConfiguracionPage = () => {
         }
     };
 
-    // FUNCIÓN CORREGIDA: Restaurar
+    // Restaurar
     const restaurarServicio = async (id) => {
         try {
             await api.put(`/servicios/${id}`, { activo: 1 });
-            await fetchServicios(); // Recargamos
+            await fetchServicios(); 
             alert("Servicio restaurado correctamente");
         } catch (err) {
             alert("Error al restaurar");
@@ -187,7 +187,7 @@ const ConfiguracionPage = () => {
                 </div>
             </div>
 
-            {/* MODAL PAPELERA (Diseño corregido) */}
+            {/* MODAL PAPELERA */}
             {showPapelera && (
                 <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', zIndex: 2100 }}>
                     <div className="modal-dialog modal-lg modal-dialog-centered">

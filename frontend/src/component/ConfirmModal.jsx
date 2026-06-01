@@ -1,4 +1,3 @@
-// src/component/ConfirmModal.jsx
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -11,7 +10,7 @@ const ConfirmModal = ({
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
   confirmColor = 'danger',
-  showCancel = true, // Nueva prop para ocultar cancelar en mensajes de éxito
+  showCancel = true, 
   style = {} 
 }) => {
   if (!show) return null;

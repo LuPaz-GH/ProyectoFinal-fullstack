@@ -23,8 +23,6 @@ const MedicamentosPage = () => {
     const [totalPaginas, setTotalPaginas] = useState(1);
     const limite = 12;
     const [loading, setLoading] = useState(false);
-
-    // ESTADO PARA EL MODAL DE ÉXITO REDISEÑADO
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [mensajeExito, setMensajeExito] = useState('');
 
@@ -259,7 +257,7 @@ const MedicamentosPage = () => {
                 )}
             </div>
 
-            {/* MODAL PAPELERA REDISEÑADO CON BUSCADOR */}
+            {/* MODAL PAPELERA CON BUSCADOR */}
             {showPapelera && (
                 <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1070 }}>
                     <div className="modal-dialog modal-xl modal-dialog-centered">
@@ -310,7 +308,7 @@ const MedicamentosPage = () => {
                 </div>
             )}
 
-            {/* MODAL DE ÉXITO ESTÉTICO CORREGIDO */}
+            {/* MODAL DE ÉXITO ESTÉTICO */}
             {showSuccessModal && (
                 <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 4000 }}>
                     <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>

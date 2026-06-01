@@ -54,7 +54,7 @@ const GestionEmpleados = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // ✅ ESTADOS PARA PAGINACIÓN
+  // ESTADOS PARA PAGINACIÓN
   const [paginaActual, setPaginaActual] = useState(1);
   const [empleadosPorPagina] = useState(5);
 
@@ -118,7 +118,7 @@ const GestionEmpleados = () => {
       if (!res.ok) throw new Error('Error al cargar empleados');
       const data = await res.json();
       setEmpleados(data.filter(emp => emp.activo === 1));
-      setPaginaActual(1); // Resetear a primera página al recargar
+      setPaginaActual(1); 
     } catch (err) {
       setError('No se pudieron cargar los empleados');
     } finally {
@@ -251,13 +251,13 @@ const GestionEmpleados = () => {
     return <span className={`badge ${colors[rol] || 'bg-secondary'} px-3 py-2 text-capitalize`}>{rol}</span>;
   };
 
-  // ✅ LÓGICA DE FILTRADO
+  // LÓGICA DE FILTRADO
   const empleadosFiltrados = empleados.filter(emp => 
     emp.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
     emp.rol.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  // ✅ LÓGICA DE PAGINACIÓN
+  // LÓGICA DE PAGINACIÓN
   const indiceUltimoEmpleado = paginaActual * empleadosPorPagina;
   const indicePrimerEmpleado = indiceUltimoEmpleado - empleadosPorPagina;
   const empleadosPaginaActual = empleadosFiltrados.slice(indicePrimerEmpleado, indiceUltimoEmpleado);
@@ -444,7 +444,7 @@ const GestionEmpleados = () => {
           </table>
         </div>
 
-        {/* ✅ CONTROLES DE PAGINACIÓN */}
+        {/* CONTROLES DE PAGINACIÓN */}
         {totalPaginas > 1 && (
           <div className="d-flex justify-content-between align-items-center mb-5">
             <div className="text-white">

@@ -1,9 +1,7 @@
 // backend/services/emailService.js
 const Mailjet = require('node-mailjet');
 
-/**
- * Función para enviar un email genérico
- */
+
 const enviarEmail = async (toEmail, subject, text, html = null) => {
   try {
     // Verificamos que existan las variables
@@ -11,7 +9,7 @@ const enviarEmail = async (toEmail, subject, text, html = null) => {
       throw new Error('Faltan las credenciales de Mailjet en el .env');
     }
 
-    // Creamos la conexión AQUÍ
+   
     const mailjet = new Mailjet({
       apiKey: process.env.MJ_APIKEY_PUBLIC,
       apiSecret: process.env.MJ_APIKEY_PRIVATE

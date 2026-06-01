@@ -341,7 +341,7 @@ const ClientesPage = () => {
           </>
         )}
 
-        {/* ==================== MODAL PAPELERA (z-index 1200) ==================== */}
+        {/* ==================== MODAL PAPELERA ==================== */}
         {showPapelera && (
             <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 1200 }}>
                 <div className="modal-dialog modal-lg modal-dialog-centered">
@@ -415,7 +415,7 @@ const ClientesPage = () => {
                                 style={{ backgroundColor: '#2C3E50', borderRadius: '25px' }} 
                                 onClick={(ev) => {
                                   ev.stopPropagation();
-                                  setShowConfirmPermanente(false); // Limpiamos por si acaso
+                                  setShowConfirmPermanente(false);
                                   setShowPapelera(false);
                                 }}
                             >
@@ -518,7 +518,7 @@ const ClientesPage = () => {
           style={{ zIndex: 4000 }} 
         />
 
-        {/* NUEVO MODAL DE ÉXITO (PARA REEMPLAZAR EL ALERT) */}
+        {/* NUEVO MODAL DE ÉXITO  */}
         <ConfirmModal 
           show={showSuccessModal} 
           onClose={() => setShowSuccessModal(false)} 

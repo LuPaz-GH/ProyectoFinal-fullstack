@@ -11,12 +11,12 @@ import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportE
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from '../services/api';
-import ConfirmModal from '../component/ConfirmModal'; // ← Importamos tu componente de confirmación lindo
+import ConfirmModal from '../component/ConfirmModal'; 
 
 const EsteticaPage = () => {
     const [servicios, setServicios] = useState([]);
     const [serviciosEliminados, setServiciosEliminados] = useState([]); 
-    const [busquedaPapelera, setBusquedaPapelera] = useState(''); // ← Estado para buscar en papelera
+    const [busquedaPapelera, setBusquedaPapelera] = useState(''); 
     const [mascotas, setMascotas] = useState([]);
     const [loadingMascotas, setLoadingMascotas] = useState(false);
     const [busqueda, setBusqueda] = useState('');
@@ -590,7 +590,7 @@ const EsteticaPage = () => {
                     </>
                 )}
 
-                {/* MODAL PAPELERA REDISEÑADO CON BUSCADOR Y BORRADO DEFINITIVO */}
+                {/* MODAL PAPELERA CON BUSCADOR Y BORRADO DEFINITIVO */}
                 {showPapelera && (
                     <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 3000 }}>
                         <div className="modal-dialog modal-xl modal-dialog-centered">
@@ -733,7 +733,7 @@ const EsteticaPage = () => {
                     </div>
                 )}
 
-                {/* MODALES DE CONFIRMACIÓN CON COMPONENTE LINDO */}
+                {/* MODALES DE CONFIRMACIÓN */}
                 <ConfirmModal 
                     show={confirmacion.show} 
                     onClose={() => setConfirmacion({ show: false })} 

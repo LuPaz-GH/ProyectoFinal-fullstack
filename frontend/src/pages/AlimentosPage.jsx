@@ -32,7 +32,7 @@ const AlimentosPage = () => {
     const [filtroFecha, setFiltroFecha] = useState('todo'); 
     const [fechaPersonalizada, setFechaPersonalizada] = useState('');
 
-    // ESTADO PARA EL MODAL DE ÉXITO REDISEÑADO
+    // ESTADO PARA EL MODAL DE ÉXITO 
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [mensajeExito, setMensajeExito] = useState('');
 
@@ -322,13 +322,13 @@ const AlimentosPage = () => {
                 </div>
             )}
 
-            {/* === MODAL DE ÉXITO ESTÉTICO CORREGIDO === */}
+            {/* === MODAL DE ÉXITO  === */}
             {showSuccessModal && (
                 <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 4000 }}>
                     <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>
-                        {/* IMPORTANTE: Quitamos overflow hidden y agregamos margin top para que el círculo respire */}
+                    
                         <div className="modal-content border-0 rounded-5 text-center p-5 position-relative shadow-lg" style={{ overflow: 'visible', marginTop: '40px' }}>
-                            {/* Círculo con el check - Mejorada la posición y tamaño */}
+                            
                             <div className="position-absolute start-50 translate-middle bg-white rounded-circle shadow d-flex align-items-center justify-content-center" 
                                  style={{ top: '0', width: '100px', height: '100px' }}>
                                 <FontAwesomeIcon icon={faCheckCircle} style={{ fontSize: '80px', color: '#2ecc71' }} />

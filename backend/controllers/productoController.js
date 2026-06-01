@@ -1,5 +1,5 @@
 const productoService = require('../services/productoService');
-const pool = require('../config/db'); // ← AGREGADO
+const pool = require('../config/db'); 
 
 const productoController = {
     // 1. Obtener productos por categoría
@@ -26,7 +26,7 @@ const productoController = {
         }
     },
 
-    // 2. CREAR: Ahora también registra en auditoría (por si el service no lo hace)
+    // 2. CREAR: registra en auditoría 
     crearProducto: async (req, res) => {
         try {
             const usuarioId = req.user ? req.user.id : null;
@@ -109,7 +109,7 @@ const productoController = {
         }
     },
 
-    // NUEVO: Obtener productos de la papelera por categoría (Ej: Petshop)
+    // Obtener productos de la papelera por categoría (Ej: Petshop)
     getPapeleraPorCategoria: async (req, res) => {
         try {
             const { categoria } = req.params;
@@ -121,7 +121,7 @@ const productoController = {
         }
     },
 
-    // NUEVO: Restaurar producto de la papelera
+    // Restaurar producto de la papelera
     restaurarProducto: async (req, res) => {
         try {
             const { id } = req.params;
@@ -147,7 +147,7 @@ const productoController = {
         }
     },
 
-    // NUEVO: Borrado permanente de la DB
+    // Borrado permanente de la DB
     eliminarProductoPermanente: async (req, res) => {
         try {
             if (!req.user || req.user.rol !== 'admin') {

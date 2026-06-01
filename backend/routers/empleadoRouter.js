@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
-const bcrypt = require('bcrypt'); // ← NUEVO: para hashear contraseñas
+const bcrypt = require('bcrypt'); 
 
-const SALT_ROUNDS = 10; // Puedes subirlo a 12 o 14 en producción
+const SALT_ROUNDS = 10; 
 
 // GET - Listar empleados activos
 router.get('/', async (req, res) => {
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// NUEVO: GET - Listar empleados en la papelera (activos = 0)
+// GET - Listar empleados en la papelera (activos = 0)
 router.get('/papelera', async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -82,13 +82,13 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT - Actualizar empleado (CON AUDITORÍA INTEGRADA ✅)
+// PUT - Actualizar empleado (CON AUDITORÍA INTEGRADA)
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { nombre, usuario, password, rol, activo } = req.body;
 
   try {
-    // 1. Verificar que el empleado existe y obtener su nombre original
+    // 1. Verifica que el empleado existe y obtener su nombre original
     const [existing] = await pool.query('SELECT id, nombre FROM empleados WHERE id = ?', [id]);
     if (existing.length === 0) {
       return res.status(404).json({ error: 'Empleado no encontrado' });
@@ -154,8 +154,8 @@ router.put('/:id', async (req, res) => {
     // 3. Ejecutar la actualización en la base de datos
     await pool.query(query, params);
 
-    // 4. ✅ REGISTRAR EN AUDITORÍA
-    // Intentamos obtener el usuario responsable desde el token (si existe)
+    // 4. REGISTRAR EN AUDITORÍA
+    // Intentamos obtener el usuario responsable desde el token 
     let responsable = 'Sistema';
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {

@@ -13,13 +13,13 @@ const ResetPassword = () => {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [newUsuario, setNewUsuario] = useState('');  // ← Nuevo campo para usuario
+  const [newUsuario, setNewUsuario] = useState('');  
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // ✅ CORREGIDO: El token es lo importante, el email es opcional
+    
     if (!token) {
       setError('Enlace de recuperación inválido o incompleto. Volvé a solicitar uno nuevo desde el login.');
     }
@@ -39,7 +39,7 @@ const ResetPassword = () => {
       return;
     }
 
-    // ✅ CORREGIDO: newUsuario es OPCIONAL (como en el backend)
+    
     if (newUsuario.trim() && newUsuario.trim().length < 4) {
       setError('El nuevo usuario debe tener al menos 4 caracteres.');
       return;
@@ -58,9 +58,8 @@ const ResetPassword = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token,
-          // ✅ email es opcional, el backend usa el token para identificar al usuario
           newPassword: password,
-          newUsuario: newUsuario.trim() || null  // ← Enviamos null si está vacío (como espera el backend)
+          newUsuario: newUsuario.trim() || null  
         })
       });
 

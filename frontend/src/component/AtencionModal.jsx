@@ -1,4 +1,3 @@
-// src/component/AtencionModal.jsx
 import React, { useState } from 'react';
 
 const AtencionModal = ({ show, onClose, turno, veterinarioId, onFinalizar }) => {

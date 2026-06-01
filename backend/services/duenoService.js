@@ -47,7 +47,7 @@ const duenoService = {
         return result.affectedRows > 0;
     },
 
-    // 6. Borrado Lógico (Soft Delete con Auditoría)
+    // 6. Borrado Lógico 
     delete: async (id, usuarioId) => {
         const [result] = await pool.query(
             'UPDATE duenos SET activo = 0, borrado_por = ?, fecha_borrado = NOW() WHERE id = ?', 

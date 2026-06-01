@@ -6,7 +6,6 @@ const AppRouter = () => {
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
-      {/* El /* es FUNDAMENTAL para que funcione el MascotasRouter */}
       <Route path="/mascotas/*" element={<MascotasRouter />} />
     </Routes>
   );

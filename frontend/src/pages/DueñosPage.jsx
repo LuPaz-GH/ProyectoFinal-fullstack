@@ -54,7 +54,6 @@ const DueñosPage = () => {
   // --- LÓGICA DEL BUSCADOR ---
   const duenosFiltrados = duenos.filter((d) => {
     const termino = busqueda.toLowerCase();
-    // CORREGIDO: Manejo de nulos para evitar error toString()
     const nombre = (d.nombre || "").toLowerCase();
     const dni = d.dni ? d.dni.toString() : "";
     const tel = (d.telefono || "");
@@ -201,7 +200,7 @@ const DueñosPage = () => {
           </div>
         </div>
 
-        {/* TABLA TRANSPARENTE (GLASSMORPHISM) */}
+        {/* TABLA TRANSPARENTE GLASSMORPHISM */}
         <div className="table-responsive shadow-lg rounded-4 overflow-hidden" 
              style={{ 
                  background: 'rgba(255, 255, 255, 0.8)', 

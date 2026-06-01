@@ -10,7 +10,7 @@ const HistorialModal = ({ show, onClose, onGuardar, clientes = [], datosEdicion 
   });
   const [mascotasDelDueño, setMascotasDelDueño] = useState([]);
 
-  // Efecto para cargar datos si se va a editar o resetear si es nuevo
+  
   useEffect(() => {
     if (datosEdicion && show) {
       setFormData(datosEdicion);

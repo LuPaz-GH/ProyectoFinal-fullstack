@@ -159,7 +159,7 @@ router.get('/papelera', async (req, res) => {
 
 // ==================== RUTAS PROTEGIDAS CON AUTH ====================
 
-// Rutas POST, PATCH y PUT (mantengo sin auth por ahora, ya que antes funcionaban)
+// Rutas POST, PATCH y PUT 
 router.post('/', async (req, res) => {
     try {
         const { producto, mascota, categoria, servicio, accion, responsable, modulo, fecha, id_referencia } = req.body;
@@ -251,7 +251,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// ==================== BORRADO PERMANENTE (CORREGIDO) ====================
+// ==================== BORRADO PERMANENTE ====================
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
         if (!req.user || req.user.rol !== 'admin') {

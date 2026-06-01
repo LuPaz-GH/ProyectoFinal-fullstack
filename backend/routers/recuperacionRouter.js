@@ -7,7 +7,7 @@ const { enviarEmail } = require('../services/emailService');
 const fetch = require('node-fetch');
 
 // =====================================================
-// POST /api/recuperacion - Solicitud manual (público)
+// POST /api/recuperacion - Solicitud manual 
 // =====================================================
 router.post('/', async (req, res) => {
   const { nombre, email, mensaje } = req.body;
@@ -45,7 +45,7 @@ router.post('/', async (req, res) => {
     );
 
     const tuNumero = '5493815192208';
-    const apiKey = 'TU_API_KEY_AQUI'; // ← CAMBIAR POR TU API KEY REAL
+    const apiKey = 'TU_API_KEY_AQUI'; 
 
     try {
       const notifResponse = await fetch(
@@ -145,7 +145,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // =====================================================
-// POST /api/recuperacion/forgot-password-email   ← NUEVO (el que vas a usar)
+// POST /api/recuperacion/forgot-password-email   
 // =====================================================
 router.post('/forgot-password-email', async (req, res) => {
   const { email } = req.body;
@@ -172,7 +172,7 @@ router.post('/forgot-password-email', async (req, res) => {
     const user = users[0];
 
     const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+    const expires = new Date(Date.now() + 60 * 60 * 1000); 
 
     await pool.query(
       'UPDATE empleados SET reset_token = ?, reset_expires = ? WHERE id = ?',
@@ -214,7 +214,7 @@ router.post('/forgot-password-email', async (req, res) => {
 });
 
 // =====================================================
-// POST /api/recuperacion/forgot-password/reset-password  ← ACTUALIZADO
+// POST /api/recuperacion/forgot-password/reset-password  
 // =====================================================
 router.post('/forgot-password/reset-password', async (req, res) => {
   const { token, newPassword, newUsuario } = req.body;

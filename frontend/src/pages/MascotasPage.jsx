@@ -6,7 +6,7 @@ import {
   faFilePdf, faFileExcel, faInfoCircle, faUser, faDna, faClipboardList, faIdCard, faToggleOff
 } from '@fortawesome/free-solid-svg-icons';
 
-// --- COMPONENTE DE CONFIRMACIÓN IMPORTADO ---
+
 import ConfirmModal from '../component/ConfirmModal'; 
 
 import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
@@ -152,7 +152,7 @@ const MascotasPage = () => {
         backgroundAttachment: 'fixed'
       }}
     >
-      {/* Sin overlay morado: imagen limpia y sin filtro */}
+      
       <div className="container-fluid p-4 position-relative" style={{ zIndex: 1 }}>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="text-white fw-bold"><FontAwesomeIcon icon={faPaw} className="me-2"/> Pacientes</h1>
@@ -201,7 +201,7 @@ const MascotasPage = () => {
           ))}
         </div>
 
-        {/* Modal Ficha Médica Rediseñado */}
+        {/* Modal Ficha Médica*/}
         {showDetalleModal && pacienteSeleccionado && (
           <div className="modal d-block" style={{backgroundColor:'rgba(0,0,0,0.7)', zIndex: 2000}}>
             <div className="modal-dialog modal-dialog-centered">

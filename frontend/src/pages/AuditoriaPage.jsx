@@ -560,7 +560,7 @@ const AuditoriaPage = ({ user }) => {
           </div>
         </div>
 
-        {/* Tabla Principal - SIN COLUMNA MASCOTA */}
+        {/* Tabla Principal  */}
         <div className="rounded-4 shadow-lg overflow-hidden" style={{ 
           background: 'rgba(255, 255, 255, 0.75)', 
           backdropFilter: 'blur(15px)',

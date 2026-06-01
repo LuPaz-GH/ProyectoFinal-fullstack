@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const duenoController = require('../controllers/duenoController');
 const authMiddleware = require('../middleware/auth');
-const pool = require('../config/db'); // ← Necesario para el borrado permanente
+const pool = require('../config/db'); 
 
-// Ruta para ver los borrados (Papelera)
+// Ruta para ver los borrados de la Papelera
 router.get('/papelera', authMiddleware, duenoController.getPapelera);
 
 // Ruta para restaurar un cliente

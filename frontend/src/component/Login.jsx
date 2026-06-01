@@ -1,13 +1,11 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. Importamos el "GPS" de React
+import { useNavigate } from 'react-router-dom'; 
 
 const Login = () => {
-  const navigate = useNavigate(); // 2. Inicializamos la función para navegar
+  const navigate = useNavigate(); 
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Aquí es donde después conectaremos con el Service para validar en MySQL
-    // Por ahora, entramos directo para probar:
     navigate('/mascotas'); 
   };
 
@@ -16,7 +14,7 @@ const Login = () => {
       <div className="card p-4 shadow-lg" style={{ width: '380px', borderRadius: '20px' }}>
         <div className="card-body text-center">
           <h2 className="mb-4" style={{ color: '#663399', fontWeight: 'bold' }}>Veterinaria</h2>
-          <form onSubmit={handleLogin}> {/* Usamos un formulario para que sea más profesional */}
+          <form onSubmit={handleLogin}> 
             <div className="mb-3 text-start">
               <label className="form-label text-muted small">Usuario</label>
               <input type="text" className="form-control" placeholder="nombre@ejemplo.com" required />

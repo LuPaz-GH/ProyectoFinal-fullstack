@@ -292,7 +292,6 @@ INSERT INTO historial_estetica (mascota_id, turno_id, peluquero_id, precio, dura
 (2, 2, 4, 3200.00, 45, 'Baño simple'),
 (3, 1, 3, 4800.00, 70, 'Grooming completo');
 
--- MIGRACIÓN: Agregar columna nombre_cliente a la tabla caja
--- Ejecutar este comando en tu base de datos si la tabla caja ya existe:
+
 ALTER TABLE caja ADD COLUMN IF NOT EXISTS nombre_cliente VARCHAR(150) DEFAULT NULL;
 

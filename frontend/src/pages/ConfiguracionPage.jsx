@@ -79,7 +79,7 @@ const ConfiguracionPage = () => {
         }
     };
 
-    // Abrir modal de confirmación en lugar de confirm() nativo
+    // Abrir modal de confirmación 
     const solicitarMoverAPapelera = (servicio) => {
         setConfirmModal({ show: true, servicio });
     };
@@ -279,7 +279,7 @@ const ConfiguracionPage = () => {
             )}
 
             {/* ============================================================ */}
-            {/* 1. NUEVO MODAL ESTÉTICO DE CONFIRMACIÓN (Reemplaza confirm) */}
+            {/* 1. MODAL ESTÉTICO DE CONFIRMACIÓN */}
             {/* ============================================================ */}
             {confirmModal.show && (
                 <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 2200, backdropFilter: 'blur(3px)' }}>
@@ -300,7 +300,7 @@ const ConfiguracionPage = () => {
             )}
 
             {/* ============================================================ */}
-            {/* 2. NUEVO REDISEÑO DEL MODAL DE PAPELERA (Más limpio) */}
+            {/* 2.MODAL DE PAPELERA */}
             {/* ============================================================ */}
             {showPapelera && (
                 <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.7)', zIndex: 2100, backdropFilter: 'blur(4px)' }}>
@@ -352,7 +352,7 @@ const ConfiguracionPage = () => {
             )}
 
             {/* ============================================================ */}
-            {/* 3. NUEVO MENSAJE DE ÉXITO SUAVE (TOAST) REEMPLAZA AL MODAL GIGANTE */}
+            {/* 3. NUEVO MENSAJE DE ÉXITO */}
             {/* ============================================================ */}
             {toast.show && (
                 <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 3000 }}>
@@ -368,7 +368,7 @@ const ConfiguracionPage = () => {
                 </div>
             )}
 
-            {/* CSS adicional insertado directamente para estilos rápidos */}
+           
             <style>{`
                 .fs-7 { font-size: 0.85rem; }
                 .fs-8 { font-size: 0.75rem; }

@@ -9,17 +9,15 @@ import { Link } from 'react-router-dom';
 import DueñoDashboard from './DueñoDashboard'; 
 import VeterinarioDashboard from './VeterinarioDashboard';
 import RecepcionistaDashboard from './RecepcionistaDashboard';
-// import PeluqueroDashboard from './PeluqueroDashboard'; // Descomentar si tenés este componente
+// import PeluqueroDashboard from './PeluqueroDashboard'; // 
 
 const HomePage = ({ user, onLogout }) => {
-  // === DEBUG: Verificar qué está llegando ===
   console.log('🔍 HomePage - User object:', user);
   console.log('🔑 HomePage - Rol raw:', user?.rol);
   console.log('🔑 HomePage - Rol normalizado:', user?.rol?.toLowerCase()?.trim());
 
   // Normalizar el rol para evitar problemas de mayúsculas/espacios
   const rolNormalizado = user?.rol?.toLowerCase().trim();
-
   const isVeterinario = rolNormalizado === 'veterinario';
   const isRecepcionista = rolNormalizado === 'recepcionista';
   const isPeluquero = rolNormalizado === 'peluquero';

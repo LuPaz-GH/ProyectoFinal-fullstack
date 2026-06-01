@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export const useMascotas = () => {
-  // Iniciamos con los datos que ya tenías
+ 
   const [mascotas, setMascotas] = useState([
     { id: 1, nombre: 'Firulais', especie: 'Perro', raza: 'Labrador', dueño: 'Juan Perez' },
     { id: 2, nombre: 'Michi', especie: 'Gato', raza: 'Siamés', dueño: 'Maria Lopez' },

@@ -145,7 +145,7 @@ const CajaPage = ({ user }) => {
         const cx = W / 2;
 
         // ── HEADER ──────────────────────────────────────────
-        doc.setFillColor(44, 62, 80);           // navy
+        doc.setFillColor(44, 62, 80);          
         doc.rect(0, 0, W, 28, 'F');
 
         doc.setTextColor(255, 255, 255);
@@ -342,7 +342,6 @@ const CajaPage = ({ user }) => {
             const match = linea.match(/(\d+)x\s+(.+?)\s*\(\$\s*([\d.,]+)/);
             if (match) {
                 const cantidad = parseInt(match[1]);
-                // El número en la descripción es el SUBTOTAL del ítem, no el precio unitario
                 const subtotal = parseFloat(match[3].replace(/\./g, '').replace(',', '.'));
                 return {
                     idUnico: `edit-${Date.now()}-${index}`,
@@ -443,7 +442,7 @@ const CajaPage = ({ user }) => {
     const totalEfectivo = ventasHoy.filter(v => v.metodo_pago === 'efectivo').reduce((acc, v) => acc + parseFloat(v.monto || 0), 0);
     const totalTransferencia = ventasHoy.filter(v => v.metodo_pago === 'transferencia').reduce((acc, v) => acc + parseFloat(v.monto || 0), 0);
     const totalTarjeta = ventasHoy.filter(v => v.metodo_pago === 'tarjeta').reduce((acc, v) => acc + parseFloat(v.monto || 0), 0);
-    // ---------------------------------
+    
 
     return (
         <div className="container-fluid min-vh-100 p-4 text-dark position-relative" style={{ backgroundImage: `url('https://i.pinimg.com/736x/ef/1f/af/ef1faf0a74cd6ef7768e445731e194eb.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundAttachment: 'fixed' }}>

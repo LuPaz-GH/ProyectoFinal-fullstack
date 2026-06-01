@@ -7,7 +7,6 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Aquí mañana limpiaremos el token de sesión
     navigate('/login');
   };
 

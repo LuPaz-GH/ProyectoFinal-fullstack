@@ -2,7 +2,7 @@ import ExcelJS from 'exceljs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-// ─── EXCEL ────────────────────────────────────────────────────────────────────
+// ─── EXCEL ────────────
 
 export async function exportarExcelEstilizado({
   data,
@@ -94,7 +94,7 @@ export async function exportarExcelEstilizado({
     }
   });
 
-  // Borde exterior derecho en encabezado (ya cubierto por medium en cada celda)
+  // Borde exterior derecho en encabezado 
   worksheet.views = [{ state: 'frozen', ySplit: headerRowIndex }];
 
   const buffer = await workbook.xlsx.writeBuffer();
@@ -111,7 +111,7 @@ export async function exportarExcelEstilizado({
   URL.revokeObjectURL(url);
 }
 
-// ─── PDF ─────────────────────────────────────────────────────────────────────
+// ─── PDF ───────
 
 /**
  * Genera un PDF con tabla estilizada.
@@ -142,7 +142,7 @@ export function exportarPDFEstilizado({
     hour: '2-digit', minute: '2-digit'
   });
 
-  // ── Banda superior ──────────────────────────────────────────────────────────
+  // ── Banda superior ────────────────────
   doc.setFillColor(...headerColor);
   doc.rect(0, 0, W, 26, 'F');
 
@@ -174,7 +174,7 @@ export function exportarPDFEstilizado({
     startY += 7;
   }
 
-  // ── Tabla ───────────────────────────────────────────────────────────────────
+  // ── Tabla ───────────────
   autoTable(doc, {
     startY,
     head: [columnas],

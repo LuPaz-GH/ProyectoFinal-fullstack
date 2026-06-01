@@ -650,7 +650,7 @@ const operacionController = {
         }
     },
 
-    // DASHBOARD - REPORTES ✅ CORREGIDO
+    // DASHBOARD 
     getReportesDashboard: async (req, res) => {
         try {
             const reportes = await operacionService.getReportesDashboard();

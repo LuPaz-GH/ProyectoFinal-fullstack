@@ -20,7 +20,7 @@ const VeterinarioDashboard = ({ onLogout }) => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      {/* Overlay oscuro para mejorar legibilidad */}
+      {/* Overlay oscuro  */}
       <div 
         className="position-fixed top-0 start-0 w-100 h-100"
         style={{ 

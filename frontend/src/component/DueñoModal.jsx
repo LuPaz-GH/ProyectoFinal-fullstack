@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 const DueñoModal = ({ show, onClose, onGuardar, datosEdicion }) => {
-    // Agregamos 'email' que está en tu tabla SQL y manejamos el 'id' para editar
     const [formData, setFormData] = useState({ 
         nombre: '', 
         dni: '', 
@@ -14,7 +13,6 @@ const DueñoModal = ({ show, onClose, onGuardar, datosEdicion }) => {
         if (datosEdicion && show) {
             setFormData(datosEdicion);
         } else if (show) {
-            // Si es nuevo, reseteamos el formulario
             setFormData({ nombre: '', dni: '', telefono: '', email: '', direccion: '' });
         }
     }, [datosEdicion, show]);
@@ -23,7 +21,7 @@ const DueñoModal = ({ show, onClose, onGuardar, datosEdicion }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Pasamos el formData completo al componente padre (DueñosPage)
+    
         onGuardar(formData);
     };
 

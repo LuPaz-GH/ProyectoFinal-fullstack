@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// ✅ Crear instancia de axios con configuración base
+//  Crear instancia de axios con configuración base
 const api = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api`,
     timeout: 60000,
@@ -9,19 +9,19 @@ const api = axios.create({
     }
 });
 
-// ✅ INTERCEPTOR DE REQUEST: Agrega el token JWT automáticamente
+// INTERCEPTOR DE REQUEST: Agrega el token JWT automáticamente
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
         
-        // 🔍 Logging para debug (solo en desarrollo)
+        //  Logging para debug 
         if (process.env.NODE_ENV === 'development') {
             console.log('🔐 [API Interceptor] Token encontrado:', token ? '✅ Sí' : '❌ No');
             console.log('🔐 [API Interceptor] URL:', config.url);
         }
         
         if (token) {
-            // Limpiar posibles comillas extra o espacios
+            
             const cleanToken = token.trim().replace(/^["']|["']$/g, '');
             config.headers.Authorization = `Bearer ${cleanToken}`;
             
@@ -38,13 +38,13 @@ api.interceptors.request.use(
     }
 );
 
-// ✅ INTERCEPTOR DE RESPONSE: Maneja errores de autenticación
+//  INTERCEPTOR DE RESPONSE: Maneja errores de autenticación
 api.interceptors.response.use(
     (response) => {
         return response;
     },
     (error) => {
-        // 🔍 Logging de errores
+        //  Logging de errores
         if (process.env.NODE_ENV === 'development') {
             console.error('❌ [API Response] Error:', {
                 status: error.response?.status,

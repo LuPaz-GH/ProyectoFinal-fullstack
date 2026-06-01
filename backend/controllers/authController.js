@@ -6,22 +6,19 @@ exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // 🔍 1. Verificamos si el email tiene formato válido
+    // Verificamos si el email tiene formato válido
     if (!email || !email.includes('@')) {
       return res.status(400).json({ message: 'Ingresa un email válido.' });
     }
-
-    // ️ 2. Por seguridad, SIEMPRE respondemos OK incluso si el email no existe
-    // (para que nadie pueda saber qué correos están registrados)
     
-    // 🔑 3. Creamos un token temporal que dura 15 minutos
+    //  Crea un token temporal que dura 15 minutos
     const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-    // 🔗 4. Armamos el enlace que le enviaremos al usuario
-    // (Asumimos que tu frontend corre en puerto 5173 con Vite)
+    // Se arma el enlace que le enviaremos al usuario
+    
     const resetLink = `http://localhost:5173/recuperar-contrasena?token=${resetToken}`;
 
-    // 📧 5. Enviamos el correo con Mailjet
+    //  Envia el correo con Mailjet
     await enviarEmail(
       email,
       '🔑 Recuperación de contraseña - Veterinaria Malfi',

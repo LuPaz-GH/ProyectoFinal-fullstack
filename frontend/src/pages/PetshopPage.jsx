@@ -256,7 +256,7 @@ const PetshopPage = () => {
                 )}
             </div>
 
-            {/* MODAL PAPELERA REDISEÑADO CON BUSCADOR */}
+            {/* MODAL PAPELERA CON BUSCADOR */}
             {showPapelera && (
                 <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 1070 }}>
                     <div className="modal-dialog modal-xl modal-dialog-centered">
@@ -310,7 +310,7 @@ const PetshopPage = () => {
                 </div>
             )}
 
-            {/* === MODAL DE ÉXITO ESTÉTICO CORREGIDO === */}
+            {/* === MODAL DE ÉXITO  === */}
             {showSuccessModal && (
                 <div className="modal d-block" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 4000 }}>
                     <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '400px' }}>

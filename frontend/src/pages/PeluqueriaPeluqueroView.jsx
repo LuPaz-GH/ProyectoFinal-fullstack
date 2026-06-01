@@ -66,7 +66,7 @@ const TurnoModal = ({ show, onClose, onGuardar, turnoAEditar, turnosExistentes }
     setErrorHorario('');
   }, [turnoAEditar, show]);
 
-  // 🔍 Validar si el horario ya está ocupado
+  //  Validar si el horario ya está ocupado
   const verificarHorarioOcupado = useCallback((fecha, hora, idExcluir) => {
     if (!fecha || !hora) return false;
     
@@ -173,7 +173,7 @@ const TurnoModal = ({ show, onClose, onGuardar, turnoAEditar, turnosExistentes }
                   <input type="time" className={`form-control shadow-sm ${errorHorario ? 'is-invalid' : ''}`} name="hora" value={form.hora} onChange={handleChange} required />
                 </div>
                 
-                {/* 🚨 Mensaje de error de horario */}
+                {/*Mensaje de error de horario */}
                 {errorHorario && (
                   <div className="col-12">
                     <div className="alert alert-danger d-flex align-items-center py-2 mb-0 small" role="alert">
@@ -216,7 +216,7 @@ const TurnoModal = ({ show, onClose, onGuardar, turnoAEditar, turnosExistentes }
   );
 };
 
-// ... [El componente FinalizarModal queda igual, lo omito por brevedad] ...
+
 const FinalizarModal = ({ show, onClose, onGuardar, turnoId }) => {
   const [behavior, setBehavior] = useState('Bueno');
   const [notes, setNotes] = useState('');
@@ -272,7 +272,7 @@ const PeluqueriaPeluqueroView = () => {
   const [showFinalizarModal, setShowFinalizarModal] = useState(false);
   const [showTurnoModal, setShowTurnoModal] = useState(false);
   const [turnoAEditar, setTurnoAEditar] = useState(null);
-  const [mensajeError, setMensajeError] = useState(null); // 👈 Nuevo estado para mensajes
+  const [mensajeError, setMensajeError] = useState(null); 
 
   const cargarTurnos = useCallback(async () => {
     try {
@@ -338,7 +338,7 @@ const PeluqueriaPeluqueroView = () => {
     } catch (err) { console.error("Error al finalizar turno:", err); }
   };
 
-  // 🔄 Función de guardado MEJORADA con validación y mensajes claros
+  
   const guardarTurno = async (datos, idExistente) => {
     try {
       if (idExistente) { 
@@ -358,7 +358,7 @@ const PeluqueriaPeluqueroView = () => {
     } catch (err) {
       console.error("Error al guardar:", err);
       
-      // 🎯 Manejo específico de errores
+      //  Manejo específico de errores
       if (err.response?.status === 409) {
         mostrarMensaje("⚠️ El horario seleccionado ya está ocupado. Por favor, elegí otro.", "warning");
       } else if (err.response?.status === 400) {
@@ -369,7 +369,7 @@ const PeluqueriaPeluqueroView = () => {
     }
   };
 
-  // 📢 Función auxiliar para mostrar mensajes temporales
+  //  Función auxiliar para mostrar mensajes temporales
   const mostrarMensaje = (texto, tipo = 'info') => {
     setMensajeError({ texto, tipo });
     setTimeout(() => setMensajeError(null), 4000);
@@ -423,7 +423,7 @@ const PeluqueriaPeluqueroView = () => {
     <div className="min-vh-100 p-4 p-md-5" style={{ backgroundImage: `url('https://i.pinimg.com/1200x/d3/62/54/d362543624849f9fba17f8f6a85c2953.jpg')`, backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
       <div className="container position-relative">
         
-        {/* 📢 Banner de mensajes */}
+        {/*  Banner de mensajes */}
         {mensajeError && (
           <div className={`alert alert-${mensajeError.tipo === 'success' ? 'success' : mensajeError.tipo === 'warning' ? 'warning' : 'danger'} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3 shadow-lg`} style={{ zIndex: 2000, minWidth: '300px', maxWidth: '90%' }} role="alert">
             <FontAwesomeIcon icon={mensajeError.tipo === 'success' ? faCheckCircle : mensajeError.tipo === 'warning' ? faExclamationTriangle : faCircleExclamation} className="me-2" />
@@ -470,7 +470,7 @@ const PeluqueriaPeluqueroView = () => {
         )}
       </div>
 
-      {/* ✅ MODAL DE TURNO: ahora recibe turnosExistentes para validar */}
+      {/*  MODAL DE TURNO: recibe turnosExistentes para validar */}
       <TurnoModal 
         show={showTurnoModal} 
         onClose={() => setShowTurnoModal(false)} 

@@ -1,7 +1,7 @@
 const pool = require('../config/db');
 
 const productoService = {
-    // 1. Obtener productos por categoría (CORREGIDO Y MEJORADO)
+    // 1. Obtener productos por categoría 
     getByCategoria: async (categoria, pagina = 1, limite = 12) => {
         try {
             const offset = (pagina - 1) * limite;
