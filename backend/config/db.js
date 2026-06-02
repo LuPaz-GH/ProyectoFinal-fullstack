@@ -12,7 +12,12 @@ const pool = mysql.createPool({
   timezone: '-03:00'
 });
 
-// Prueba de conexión 
+// Fijar timezone Argentina en cada conexión nueva del pool
+pool.pool.on('connection', (connection) => {
+  connection.query("SET time_zone = '-03:00'");
+});
+
+// Prueba de conexión
 (async () => {
   try {
     const connection = await pool.getConnection();
