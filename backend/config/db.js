@@ -8,7 +8,8 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME || 'malfi_vet',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '-03:00'
 });
 
 // Prueba de conexión 
