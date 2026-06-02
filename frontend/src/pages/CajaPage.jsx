@@ -17,6 +17,14 @@ import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportE
 import api from '../services/api';
 import ConfirmModal from '../component/ConfirmModal';
 
+const getFechaLocal = () => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
 const CajaPage = ({ user }) => {
     const [ventas, setVentas] = useState([]); 
     const [showModal, setShowModal] = useState(false);
@@ -35,8 +43,8 @@ const CajaPage = ({ user }) => {
     const [mostrarClientes, setMostrarClientes] = useState(false);
 
     const [filtroBusqueda, setFiltroBusqueda] = useState('');
-    const [filtroFechaDesde, setFiltroFechaDesde] = useState(new Date().toISOString().split('T')[0]);
-    const [filtroFechaHasta, setFiltroFechaHasta] = useState(new Date().toISOString().split('T')[0]);
+    const [filtroFechaDesde, setFiltroFechaDesde] = useState(getFechaLocal());
+    const [filtroFechaHasta, setFiltroFechaHasta] = useState(getFechaLocal());
 
     const [busquedaProd, setBusquedaProd] = useState('');
     const [sugerenciasProd, setSugerenciasProd] = useState([]);
@@ -426,13 +434,10 @@ const CajaPage = ({ user }) => {
 
     const totalVentaCarrito = carrito.reduce((acc, i) => acc + Number(i.subtotal), 0);
     
-    // --- CORRECCIÓN LÓGICA TOTALES ---
-    const hoy = new Date();
-    const hoyISO = hoy.toISOString().split('T')[0]; // "YYYY-MM-DD"
-    const hoyLocal = hoy.toLocaleDateString('es-AR'); // "DD/MM/YYYY"
+    const hoyISO = getFechaLocal();
+    const hoyLocal = new Date().toLocaleDateString('es-AR');
 
     const ventasHoy = ventas.filter(v => {
-        // Comparamos contra v.fecha (ISO) o v.fecha_formateada (Local)
         const fechaVentaISO = v.fecha ? v.fecha.split('T')[0] : "";
         const fechaVentaLocal = v.fecha_formateada ? v.fecha_formateada.split(' ')[0] : "";
         return (fechaVentaISO === hoyISO || fechaVentaLocal === hoyLocal) && v.tipo_operacion === 'ingreso';
@@ -512,7 +517,7 @@ const CajaPage = ({ user }) => {
                                 Ver historial completo
                             </button>
                             <button className="btn btn-outline-primary rounded-pill px-3 py-2 small fw-bold"
-                                onClick={() => { const hoy = new Date().toISOString().split('T')[0]; setFiltroFechaDesde(hoy); setFiltroFechaHasta(hoy); setFiltroBusqueda(''); }}>
+                                onClick={() => { const hoy = getFechaLocal(); setFiltroFechaDesde(hoy); setFiltroFechaHasta(hoy); setFiltroBusqueda(''); }}>
                                 Hoy
                             </button>
                         </div>
