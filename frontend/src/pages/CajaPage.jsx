@@ -17,14 +17,6 @@ import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportE
 import api from '../services/api';
 import ConfirmModal from '../component/ConfirmModal';
 
-const getFechaLocal = () => {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-};
-
 const CajaPage = ({ user }) => {
     const [ventas, setVentas] = useState([]); 
     const [showModal, setShowModal] = useState(false);
@@ -43,8 +35,8 @@ const CajaPage = ({ user }) => {
     const [mostrarClientes, setMostrarClientes] = useState(false);
 
     const [filtroBusqueda, setFiltroBusqueda] = useState('');
-    const [filtroFechaDesde, setFiltroFechaDesde] = useState(getFechaLocal());
-    const [filtroFechaHasta, setFiltroFechaHasta] = useState(getFechaLocal());
+    const [filtroFechaDesde, setFiltroFechaDesde] = useState('');
+    const [filtroFechaHasta, setFiltroFechaHasta] = useState('');
 
     const [busquedaProd, setBusquedaProd] = useState('');
     const [sugerenciasProd, setSugerenciasProd] = useState([]);
@@ -380,11 +372,12 @@ const CajaPage = ({ user }) => {
                 method: datosEdicion ? 'PUT' : 'POST',
                 data: { tipo_operacion: 'ingreso', categoria: 'Venta Múltiple', descripcion: descripcionFinal, monto: totalActual, metodo_pago: metodoActual, usuario_id: user?.id, nombre_cliente: nombreCliente.trim() || null, detalles: itemsActuales }
             });
-            if (res.status === 200 || res.status === 201) { 
+            if (res.status === 200 || res.status === 201) {
                 setLastSaleData({ carrito: itemsActuales, total: totalActual, metodo: metodoActual, cliente: nombreCliente.trim() || null });
-                setShowModal(false); 
-                setCarrito([]); 
-                cargarCaja(); 
+                setShowModal(false);
+                setCarrito([]);
+                setFiltroFechaDesde('');
+                setFiltroFechaHasta('');
                 lanzarExito("Operación procesada con éxito");
             }
         } catch (err) { alert("Error al guardar la venta."); }
@@ -434,14 +427,7 @@ const CajaPage = ({ user }) => {
 
     const totalVentaCarrito = carrito.reduce((acc, i) => acc + Number(i.subtotal), 0);
     
-    const hoyISO = getFechaLocal();
-    const hoyLocal = new Date().toLocaleDateString('es-AR');
-
-    const ventasHoy = ventas.filter(v => {
-        const fechaVentaISO = v.fecha ? v.fecha.split('T')[0] : "";
-        const fechaVentaLocal = v.fecha_formateada ? v.fecha_formateada.split(' ')[0] : "";
-        return (fechaVentaISO === hoyISO || fechaVentaLocal === hoyLocal) && v.tipo_operacion === 'ingreso';
-    });
+    const ventasHoy = ventas.filter(v => v.tipo_operacion === 'ingreso');
 
     const recaudacionTotal = ventasHoy.reduce((acc, v) => acc + parseFloat(v.monto || 0), 0);
     const totalEfectivo = ventasHoy.filter(v => v.metodo_pago === 'efectivo').reduce((acc, v) => acc + parseFloat(v.monto || 0), 0);
@@ -513,11 +499,11 @@ const CajaPage = ({ user }) => {
                         </div>
                         <div className="col-md-4 d-flex gap-2">
                             <button className="btn btn-outline-secondary rounded-pill px-3 py-2 small fw-bold"
-                                onClick={() => { setFiltroFechaDesde(''); setFiltroFechaHasta(''); setFiltroBusqueda(''); }}>
+                                onClick={() => { setFiltroFechaDesde('2000-01-01'); setFiltroFechaHasta(''); setFiltroBusqueda(''); }}>
                                 Ver historial completo
                             </button>
                             <button className="btn btn-outline-primary rounded-pill px-3 py-2 small fw-bold"
-                                onClick={() => { const hoy = getFechaLocal(); setFiltroFechaDesde(hoy); setFiltroFechaHasta(hoy); setFiltroBusqueda(''); }}>
+                                onClick={() => { setFiltroFechaDesde(''); setFiltroFechaHasta(''); setFiltroBusqueda(''); }}>
                                 Hoy
                             </button>
                         </div>
@@ -525,7 +511,9 @@ const CajaPage = ({ user }) => {
                     <div className="mt-2 ps-1">
                         <small className="text-muted fst-italic">
                             {!filtroFechaDesde && !filtroFechaHasta && !filtroBusqueda
-                                ? '📋 Mostrando todo el historial'
+                                ? '📅 Mostrando registros de hoy'
+                                : filtroFechaDesde === '2000-01-01' && !filtroFechaHasta
+                                ? `📋 Mostrando todo el historial${filtroBusqueda ? ` — "${filtroBusqueda}"` : ''}`
                                 : !filtroFechaDesde && !filtroFechaHasta
                                 ? `🔍 Buscando "${filtroBusqueda}" en todo el historial`
                                 : filtroFechaDesde === filtroFechaHasta && filtroFechaDesde === new Date().toISOString().split('T')[0]

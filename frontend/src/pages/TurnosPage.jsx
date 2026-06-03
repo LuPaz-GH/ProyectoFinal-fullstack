@@ -66,7 +66,8 @@ const TurnosPage = ({ user }) => {
         mascota_id: '', dueno_id: '', fecha: '', hora: '', veterinario_id: 'aleatorio', tipo: 'consulta', motivo: '', es_urgencia: false, duracion: 15
     });
     const [busquedaMascota, setBusquedaMascota] = useState('');
-    // ACTUALIZADO: Nuevos campos para paciente no registrado en urgencias 
+    const [busquedaMascotaAtencion, setBusquedaMascotaAtencion] = useState('');
+    // ACTUALIZADO: Nuevos campos para paciente no registrado en urgencias
     const [datosAtencion, setDatosAtencion] = useState({
         peso: '',
         unidad: 'kg',
@@ -94,108 +95,117 @@ const TurnosPage = ({ user }) => {
             console.error('Error al cargar veterinarios:', err);
         }
     };
-    //  FUNCIÓN SIMPLE PARA CARGAR HORARIOS OCUPADOS
+    //  FUNCIÓN PARA CARGAR HORARIOS OCUPADOS
     const cargarHorariosOcupados = async (fecha, veterinarioId) => {
         if (!fecha) {
             setHorariosOcupados({});
             return;
         }
-     
+
         try {
             const fechaStr = fecha.includes('T') ? fecha.split('T')[0] : fecha;
             const res = await api.get('/turnos', { params: { fecha: fechaStr } });
             const turnos = res.data.data || [];
-         
-            const turnosFiltrados = veterinarioId === 'aleatorio' || !veterinarioId
-                ? turnos
-                : turnos.filter(t => !t.veterinario_id || t.veterinario_id == veterinarioId);
-         
+            const turnosActivos = turnos.filter(t => t.estado !== 'cancelado');
+
             const ocupados = {};
-            turnosFiltrados.forEach(turno => {
-                if (turno.estado === 'cancelado') return;
-             
-                const fechaTurno = turno.fecha.includes('T') ? turno.fecha : turno.fecha.replace(' ', 'T');
-                const horaKey = fechaTurno.substring(11, 16);
-             
-                ocupados[horaKey] = {
-                    ocupado: true,
-                    mascota: turno.mascota_nombre,
-                    tipo: turno.tipo
-                };
-            });
-         
-            console.log('📅 Horarios ocupados:', Object.keys(ocupados).length);
+
+            if (veterinarioId === 'aleatorio' || !veterinarioId) {
+                // En modo aleatorio: un slot está ocupado solo si TODOS los vets están ocupados en ese horario
+                const totalVets = veterinarios.length;
+                if (totalVets === 0) {
+                    setHorariosOcupados({});
+                    return;
+                }
+
+                // Agrupar turnos por hora de inicio
+                const turnosPorHora = {};
+                turnosActivos.forEach(turno => {
+                    const fechaTurno = turno.fecha.includes('T') ? turno.fecha : turno.fecha.replace(' ', 'T');
+                    const horaKey = fechaTurno.substring(11, 16);
+                    if (!turnosPorHora[horaKey]) turnosPorHora[horaKey] = [];
+                    turnosPorHora[horaKey].push(turno);
+                });
+
+                Object.entries(turnosPorHora).forEach(([hora, turnosSlot]) => {
+                    const vetsOcupados = new Set(turnosSlot.filter(t => t.veterinario_id).map(t => t.veterinario_id));
+                    if (vetsOcupados.size >= totalVets) {
+                        ocupados[hora] = { ocupado: true, mascota: 'Todos los médicos ocupados', tipo: '' };
+                    }
+                });
+            } else {
+                // Vet específico: marca los slots donde ese vet tiene turno
+                turnosActivos
+                    .filter(t => !t.veterinario_id || t.veterinario_id == veterinarioId)
+                    .forEach(turno => {
+                        const fechaTurno = turno.fecha.includes('T') ? turno.fecha : turno.fecha.replace(' ', 'T');
+                        const horaKey = fechaTurno.substring(11, 16);
+                        ocupados[horaKey] = { ocupado: true, mascota: turno.mascota_nombre, tipo: turno.tipo };
+                    });
+            }
+
             setHorariosOcupados(ocupados);
         } catch (err) {
             console.error('Error cargando horarios:', err);
             setHorariosOcupados({});
         }
     };
-    //  FUNCIÓN CORREGIDA PARA VERIFICAR DISPONIBILIDAD DE HORARIO POR MÉDICO
+    // Verifica si un turno se solapa con el rango inicio-fin
+    const tieneSolapamiento = (turno, inicioNuevo, finNuevo, turnoIdExcluir) => {
+        if (turno.id === turnoIdExcluir || turno.estado === 'cancelado') return false;
+        const fechaTurno = turno.fecha.includes('T') ? turno.fecha : turno.fecha.replace(' ', 'T');
+        const ini = new Date(fechaTurno);
+        const fin = new Date(ini.getTime() + ((turno.duracion || 15) * 60000));
+        return inicioNuevo < fin && finNuevo > ini;
+    };
+
+    //  FUNCIÓN PARA VERIFICAR DISPONIBILIDAD DE HORARIO POR MÉDICO
     const verificarDisponibilidadHorario = async (fecha, hora, duracion, veterinarioId, turnoIdExcluir = null) => {
         if (!fecha || !hora) return true;
-     
+
         setVerificandoDisponibilidad(true);
-     
+
         try {
             const fechaStr = fecha.includes('T') ? fecha.split('T')[0] : fecha;
             const res = await api.get('/turnos', { params: { fecha: fechaStr } });
             const turnosExistentes = res.data.data || [];
-         
+
             const [fechaSel, horaSel] = fecha.includes('T') ? fecha.split('T') : [fecha, hora];
             const inicioNuevo = new Date(`${fechaSel}T${horaSel}`);
             const finNuevo = new Date(inicioNuevo.getTime() + (duracion * 60000));
-         
-            const turnosFiltrados = turnosExistentes.filter(turno => {
-                if (turno.id === turnoIdExcluir) return false;
-                if (veterinarioId === 'aleatorio' || !veterinarioId) return true;
-                if (!turno.veterinario_id) return true;
-                return turno.veterinario_id == veterinarioId;
-            });
-         
-            const haySolapamiento = turnosFiltrados.some(turno => {
-                if (turno.estado === 'cancelado') return false;
-             
-                const fechaTurno = turno.fecha.includes('T') ? turno.fecha : turno.fecha.replace(' ', 'T');
-                const inicioExistente = new Date(fechaTurno);
-                const duracionExistente = turno.duracion || 15;
-                const finExistente = new Date(inicioExistente.getTime() + (duracionExistente * 60000));
-             
-                const seSolapan = (inicioNuevo < finExistente && finNuevo > inicioExistente);
-             
-                return seSolapan;
-            });
-         
-            setHorarioDisponible(!haySolapamiento);
-         
-            if (haySolapamiento) {
-                const medicoNombre = veterinarioId === 'aleatorio' || !veterinarioId
-                    ? 'algún médico'
-                    : veterinarios.find(v => v.id == veterinarioId)?.nombre || 'el médico';
-                setMensajeSolapamiento(
-                    `⚠️ ${medicoNombre} ya tiene un turno en ese horario. El turno de ${duracion} minutos se superpone.`
-                );
-            } else {
-                setMensajeSolapamiento('');
-            }
-         
-            const disponibilidad = {};
+
             if (veterinarioId === 'aleatorio' || !veterinarioId) {
+                // Modo aleatorio: disponible si AL MENOS UN vet no tiene conflicto
+                const disponibilidad = {};
+                let algunMedicoLibre = false;
+
                 veterinarios.forEach(vet => {
-                    const turnosVet = turnosExistentes.filter(t => {
-                        if (!t.veterinario_id) return true;
-                        return t.veterinario_id == vet.id && t.estado !== 'cancelado';
-                    });
-                    disponibilidad[vet.id] = {
-                        nombre: vet.nombre,
-                        turnosOcupados: turnosVet.length,
-                        disponible: true
-                    };
+                    const turnosVet = turnosExistentes.filter(t => t.veterinario_id == vet.id);
+                    const ocupado = turnosVet.some(t => tieneSolapamiento(t, inicioNuevo, finNuevo, turnoIdExcluir));
+                    disponibilidad[vet.id] = { nombre: vet.nombre, disponible: !ocupado };
+                    if (!ocupado) algunMedicoLibre = true;
                 });
+
                 setDisponibilidadPorMedico(disponibilidad);
+                setHorarioDisponible(algunMedicoLibre);
+                setMensajeSolapamiento(
+                    algunMedicoLibre ? '' : `⚠️ Todos los médicos tienen un turno en ese horario (${duracion} min).`
+                );
+                return algunMedicoLibre;
+            } else {
+                // Vet específico: revisar solo sus turnos
+                const turnosVet = turnosExistentes.filter(t => t.veterinario_id == veterinarioId);
+                const haySolapamiento = turnosVet.some(t => tieneSolapamiento(t, inicioNuevo, finNuevo, turnoIdExcluir));
+
+                setDisponibilidadPorMedico({});
+                setHorarioDisponible(!haySolapamiento);
+                setMensajeSolapamiento(
+                    haySolapamiento
+                        ? `⚠️ ${veterinarios.find(v => v.id == veterinarioId)?.nombre || 'El médico'} ya tiene un turno en ese horario (${duracion} min).`
+                        : ''
+                );
+                return !haySolapamiento;
             }
-         
-            return !haySolapamiento;
         } catch (err) {
             console.warn('⚠️ Error al verificar disponibilidad:', err.message);
             setHorarioDisponible(true);
@@ -563,6 +573,7 @@ const TurnosPage = ({ user }) => {
             });
             setShowAtencion(false);
             setTurnoSeleccionado(null);
+            setBusquedaMascotaAtencion('');
             setDatosAtencion({
                 peso: '', unidad: 'kg', diagnostico: '', tratamiento: '', mascota_id: '', veterinario_id: '',
                 esPacienteNuevo: false, sinDueno: false,
@@ -1057,12 +1068,12 @@ const TurnosPage = ({ user }) => {
                                     )}
                                     {nuevoTurno.veterinario_id === 'aleatorio' && Object.keys(disponibilidadPorMedico).length > 0 && (
                                         <div className="alert alert-light border mb-3">
-                                            <small className="fw-bold d-block mb-2">📊 Disponibilidad de médicos:</small>
+                                            <small className="fw-bold d-block mb-2">📊 Disponibilidad de médicos en este horario:</small>
                                             {Object.values(disponibilidadPorMedico).map((medico, index) => (
                                                 <div key={index} className="d-flex justify-content-between align-items-center py-1">
                                                     <span>👨‍⚕️ {medico.nombre}</span>
-                                                    <span className={`badge ${medico.turnosOcupados === 0 ? 'bg-success' : 'bg-warning text-dark'}`}>
-                                                        {medico.turnosOcupados} turno{medico.turnosOcupados !== 1 ? 's' : ''} ocupado{medico.turnosOcupados !== 1 ? 's' : ''}
+                                                    <span className={`badge ${medico.disponible ? 'bg-success' : 'bg-danger'}`}>
+                                                        {medico.disponible ? 'Disponible' : 'Ocupado en este horario'}
                                                     </span>
                                                 </div>
                                             ))}
@@ -1135,7 +1146,7 @@ const TurnosPage = ({ user }) => {
                                                     name="tipoPaciente"
                                                     id="pacienteExistente"
                                                     checked={!datosAtencion.esPacienteNuevo}
-                                                    onChange={() => setDatosAtencion({...datosAtencion, esPacienteNuevo: false, mascota_id: ''})}
+                                                    onChange={() => { setBusquedaMascotaAtencion(''); setDatosAtencion({...datosAtencion, esPacienteNuevo: false, mascota_id: ''}); }}
                                                 />
                                                 <label className="form-check-label" htmlFor="pacienteExistente">
                                                     🐾 Paciente registrado
@@ -1148,7 +1159,7 @@ const TurnosPage = ({ user }) => {
                                                     name="tipoPaciente"
                                                     id="pacienteNuevo"
                                                     checked={datosAtencion.esPacienteNuevo}
-                                                    onChange={() => setDatosAtencion({...datosAtencion, esPacienteNuevo: true, mascota_id: ''})}
+                                                    onChange={() => { setBusquedaMascotaAtencion(''); setDatosAtencion({...datosAtencion, esPacienteNuevo: true, mascota_id: ''}); }}
                                                 />
                                                 <label className="form-check-label" htmlFor="pacienteNuevo">
                                                     🆕 Paciente nuevo / No registrado
@@ -1158,15 +1169,49 @@ const TurnosPage = ({ user }) => {
                                         {!datosAtencion.esPacienteNuevo && (
                                             <div className="mb-4 p-3 bg-white rounded-4 shadow-sm">
                                                 <label className="fw-bold mb-2 text-danger small">SELECCIONAR PACIENTE *</label>
-                                                <select
-                                                    className="form-select rounded-pill"
-                                                    required
-                                                    value={datosAtencion.mascota_id}
-                                                    onChange={(e) => setDatosAtencion({...datosAtencion, mascota_id: e.target.value})}
-                                                >
-                                                    <option value="">Seleccionar mascota...</option>
-                                                    {mascotas.map(m => <option key={m.id} value={m.id}>{m.nombre} ({m.dueno_nombre})</option>)}
-                                                </select>
+                                                <div style={{ position: 'relative' }}>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control rounded-pill"
+                                                        placeholder="Buscar mascota o dueño..."
+                                                        value={busquedaMascotaAtencion}
+                                                        autoComplete="off"
+                                                        onChange={(e) => {
+                                                            setBusquedaMascotaAtencion(e.target.value);
+                                                            setDatosAtencion({...datosAtencion, mascota_id: ''});
+                                                        }}
+                                                    />
+                                                    {/* campo oculto para validación required */}
+                                                    <input type="text" required value={datosAtencion.mascota_id} onChange={() => {}} style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }} tabIndex={-1} />
+                                                    {busquedaMascotaAtencion && !datosAtencion.mascota_id && (
+                                                        <div style={{ position: 'absolute', zIndex: 9999, width: '100%', maxHeight: '220px', overflowY: 'auto', backgroundColor: 'white', border: '1px solid #dee2e6', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', top: '110%' }}>
+                                                            {mascotas.filter(m =>
+                                                                m.nombre.toLowerCase().includes(busquedaMascotaAtencion.toLowerCase()) ||
+                                                                (m.dueno_nombre && m.dueno_nombre.toLowerCase().includes(busquedaMascotaAtencion.toLowerCase()))
+                                                            ).length === 0 ? (
+                                                                <div style={{ padding: '10px 12px', color: '#888' }}>No se encontraron resultados</div>
+                                                            ) : mascotas.filter(m =>
+                                                                m.nombre.toLowerCase().includes(busquedaMascotaAtencion.toLowerCase()) ||
+                                                                (m.dueno_nombre && m.dueno_nombre.toLowerCase().includes(busquedaMascotaAtencion.toLowerCase()))
+                                                            ).map(m => (
+                                                                <div
+                                                                    key={m.id}
+                                                                    style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f0f0f0' }}
+                                                                    onMouseDown={(e) => {
+                                                                        e.preventDefault();
+                                                                        setDatosAtencion({...datosAtencion, mascota_id: m.id, dueno_id: m.dueno_id});
+                                                                        setBusquedaMascotaAtencion(`${m.nombre} (Dueño: ${m.dueno_nombre})`);
+                                                                    }}
+                                                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f4ff'}
+                                                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                                                                >
+                                                                    {m.nombre} <span style={{ color: '#888', fontSize: '0.85em' }}>(Dueño: {m.dueno_nombre})</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {datosAtencion.mascota_id && <small className="text-success mt-1 d-block">✓ Paciente seleccionado</small>}
                                             </div>
                                         )}
                                         {datosAtencion.esPacienteNuevo && (
@@ -1293,7 +1338,7 @@ const TurnosPage = ({ user }) => {
                                 </div>
                             </div>
                             <div className="modal-footer p-4 border-0">
-                                <button type="button" className="btn btn-light rounded-pill px-4" onClick={() => { setShowAtencion(false); setTurnoSeleccionado(null); }}>CANCELAR</button>
+                                <button type="button" className="btn btn-light rounded-pill px-4" onClick={() => { setShowAtencion(false); setTurnoSeleccionado(null); setBusquedaMascotaAtencion(''); }}>CANCELAR</button>
                                 <button type="submit" className="btn btn-success flex-grow-1 rounded-pill fw-bold">GUARDAR ATENCIÓN</button>
                             </div>
                         </form>

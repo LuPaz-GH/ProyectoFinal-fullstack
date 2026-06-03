@@ -16,14 +16,6 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { exportarExcelEstilizado, exportarPDFEstilizado } from '../utils/exportExcel';
 
-const getFechaLocal = () => {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
-
 const AuditoriaPage = ({ user }) => {
   const [movimientos, setMovimientos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,8 +25,8 @@ const AuditoriaPage = ({ user }) => {
   const [orden, setOrden] = useState({ campo: 'fecha', direccion: 'DESC' });
   const [filtros, setFiltros] = useState({
     buscar: '',
-    fechaDesde: getFechaLocal(),
-    fechaHasta: getFechaLocal(),
+    fechaDesde: new Date().toISOString().split('T')[0],
+    fechaHasta: new Date().toISOString().split('T')[0],
     filtroEmpleado: '',
     categoria: '',
     accion: '',
@@ -215,11 +207,10 @@ const AuditoriaPage = ({ user }) => {
   };
   
   const limpiarFiltros = () => {
-    const hoy = getFechaLocal();
     setFiltros({
       buscar: '',
-      fechaDesde: hoy,
-      fechaHasta: hoy,
+      fechaDesde: new Date().toISOString().split('T')[0],
+      fechaHasta: new Date().toISOString().split('T')[0],
       filtroEmpleado: '',
       categoria: '',
       accion: '',
@@ -456,7 +447,7 @@ const AuditoriaPage = ({ user }) => {
               <div className="col-md-2 d-flex gap-2 align-items-end pb-1">
                 <button
                   className="btn btn-outline-primary rounded-pill px-3 py-2 small fw-bold"
-                  onClick={() => { const hoy = getFechaLocal(); setFiltros(f => ({ ...f, fechaDesde: hoy, fechaHasta: hoy })); setPagina(1); }}
+                  onClick={() => { const hoy = new Date().toISOString().split('T')[0]; setFiltros(f => ({ ...f, fechaDesde: hoy, fechaHasta: hoy })); setPagina(1); }}
                 >
                   Hoy
                 </button>
@@ -558,7 +549,7 @@ const AuditoriaPage = ({ user }) => {
                   ? '📋 Mostrando todo el historial'
                   : !filtros.fechaDesde && !filtros.fechaHasta
                   ? `🔍 Buscando en todo el historial${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`
-                  : filtros.fechaDesde === filtros.fechaHasta && filtros.fechaDesde === getFechaLocal()
+                  : filtros.fechaDesde === filtros.fechaHasta && filtros.fechaDesde === new Date().toISOString().split('T')[0]
                   ? `📅 Mostrando registros de hoy${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`
                   : filtros.fechaDesde === filtros.fechaHasta
                   ? `📅 Mostrando registros del ${filtros.fechaDesde}${filtros.buscar ? ` — "${filtros.buscar}"` : ''}${filtros.filtroEmpleado ? ` — Empleado: "${filtros.filtroEmpleado}"` : ''}`
