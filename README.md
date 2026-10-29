@@ -2,6 +2,16 @@
 
 Sistema de gestión integral para veterinaria desarrollado con tecnología full-stack moderna.
 
+## 🔍 Demo en vivo
+
+👉 **[malfi-veterinaria.netlify.app](https://malfi-veterinaria.netlify.app/login)**
+
+¿Sos reclutador o cliente? En la pantalla de login tocá **"Ver demo sin registrarse"** y vas a entrar como Dueña/o, sin usuario ni contraseña.
+
+- Podés recorrer todo el sistema: pacientes, turnos, historiales, caja, reportes y más.
+- Es **solo lectura**: el backend bloquea cualquier cambio hecho desde la demo.
+- La primera carga puede tardar hasta un minuto porque el servidor (Render, plan gratuito) se "despierta".
+
 ## Descripción
 
 Proyecto fullstack que permite gestionar:
@@ -39,3 +49,5 @@ Proyecto fullstack que permite gestionar:
 
 Tecnicatura Universitaria en Programación  
 Universidad Tecnológica Nacional – Facultad Regional Tucumán
+
+📧 [lucianadanizapaz@hotmail.com](mailto:lucianadanizapaz@hotmail.com) · 💼 [LinkedIn](https://www.linkedin.com/in/daniza-paz-67920a415) · 💬 [WhatsApp](https://wa.me/5493815192208) · 🐙 [GitHub](https://github.com/LuPaz-GH)
