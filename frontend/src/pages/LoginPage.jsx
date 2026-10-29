@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faPaw, faUserShield, faUserMd, faUserEdit, 
-  faCut, faArrowLeft, faUser, faLock, faCheckCircle 
+  faCut, faArrowLeft, faUser, faLock, faCheckCircle, faEye
 } from '@fortawesome/free-solid-svg-icons';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import api from '../services/api';
@@ -28,8 +28,30 @@ const LoginPage = ({ setUser }) => {
     { id: 'admin', nombre: 'Dueña/o', icono: faUserShield, color: '#663399' },
     { id: 'veterinario', nombre: 'Veterinario', icono: faUserMd, color: '#007bff' },
     { id: 'recepcionista', nombre: 'Recepcionista', icono: faUserEdit, color: '#28a745' },
-    // { id: 'peluquero', nombre: 'Peluquero', icono: faCut, color: '#ff69b4' } // 
+    // { id: 'peluquero', nombre: 'Peluquero', icono: faCut, color: '#ff69b4' } //
   ];
+
+  // ======================== MODO DEMO ========================
+  // Ingreso sin contraseña para reclutadores y clientes (solo lectura)
+  const entrarDemo = async () => {
+    setError('');
+    setLoading(true);
+
+    try {
+      const { data } = await api.post('/login/demo');
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      if (setUser) setUser(data.user);
+
+      navigate('/home', { replace: true });
+    } catch (err) {
+      console.error('❌ [Login Demo] Error:', err);
+      setError('No se pudo iniciar la demo. Esperá unos segundos y volvé a intentar.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const manejarLogin = async (e) => {
     e.preventDefault();
@@ -246,6 +268,22 @@ const LoginPage = ({ setUser }) => {
                   <div className="fw-bold small">{roles[2].nombre}</div>
                 </button>
               </div>
+            </div>
+
+            {/* ==================== ACCESO DEMO ==================== */}
+            <div className="mt-4 pt-4 border-top">
+              {error && <div className="alert alert-danger mb-3 small">{error}</div>}
+              <p className="small text-muted mb-2">¿Sos reclutador o cliente?</p>
+              <button className="btn text-white w-100 rounded-pill py-3 fw-bold shadow"
+                style={{ background: 'linear-gradient(135deg, #663399 0%, #ff69b4 100%)' }}
+                onClick={entrarDemo} disabled={loading}>
+                <FontAwesomeIcon icon={faEye} className="me-2" />
+                {loading ? 'Abriendo la demo...' : 'Ver demo sin registrarse'}
+              </button>
+              <p className="small text-muted mt-2 mb-0">
+                Recorré todo el sistema como Dueña/o. Es solo lectura: no se guardan cambios.
+                {loading && <><br />La primera carga puede tardar hasta un minuto.</>}
+              </p>
             </div>
           </>
         ) : (

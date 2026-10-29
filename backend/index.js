@@ -45,6 +45,39 @@ app.use(cors({
 
 app.use(express.json());
 
+// MODO DEMO - SOLO LECTURA
+// Si el token es de la sesión demo, se bloquea todo lo que no sea consultar datos
+app.use('/api', (req, res, next) => {
+  if (req.method === 'GET' || req.method === 'OPTIONS' || req.path.startsWith('/login')) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+    if (decoded.demo) {
+      return res.status(403).json({ success: false, demo: true, message: 'Modo demo: solo lectura. No se pueden guardar cambios.' });
+    }
+  } catch (err) {
+    // Token inválido: lo resuelve cada ruta como siempre
+  }
+
+  next();
+});
+
+//  RUTA DE LOGIN DEMO - PÚBLICA (para reclutadores y clientes)
+app.post('/api/login/demo', (req, res) => {
+  const user = { id: 0, nombre: 'Visitante Demo', rol: 'admin', demo: true };
+
+  const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '2h' });
+
+  res.json({ success: true, token, user });
+});
+
 //  RUTA DE LOGIN - PÚBLICA
 app.post('/api/login', async (req, res) => {
   const { usuario, password } = req.body;

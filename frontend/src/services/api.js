@@ -70,6 +70,11 @@ api.interceptors.response.use(
         // Error 403 → permisos insuficientes
         if (error.response?.status === 403) {
             console.warn('⚠️ [API] Acceso denegado (403) - permisos insuficientes');
+
+            // Modo demo: avisar que no se guardan cambios
+            if (error.response?.data?.demo) {
+                alert('Estás en el modo demo: podés recorrer todo el sistema, pero no se guardan cambios.');
+            }
         }
         
         return Promise.reject(error);

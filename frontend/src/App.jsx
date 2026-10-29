@@ -17,6 +17,7 @@ import AuditoriaPage from './pages/AuditoriaPage';
 import ResetPassword from './component/ResetPassword';
 import ConfiguracionPage from './pages/ConfiguracionPage';
 import Footer from './component/Footer';
+import DemoBanner from './component/DemoBanner';
 
 // ==================== IMPORTS OCULTADOS TEMPORALMENTE ====================
 // import EsteticaPage from './pages/EsteticaPage';
@@ -154,6 +155,7 @@ const AppContent = () => {
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
         {!esLogin && user && <Footer />}
+        {!esLogin && user?.demo && <DemoBanner />}
       </main>
     </div>
   );
